@@ -1,0 +1,16 @@
+package-lock.json
+node_modules
+dist
+
+# Vim Swap files
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Mac metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
