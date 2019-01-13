@@ -53,19 +53,11 @@ export class Field {
     /**
      * Inner class of this Field that specializes at dealing with positions 
      * of this Field. This should be used to access or mutate field objects.
+     * 
+     * A Positional of {row: 0, col: 0} represents the bottomleft corner slot
+     * on the field.
      */
     this.Positional = class {
-      /** @return an iterable of visible Positional primitives. */
-      static get visible() {
-        return {
-          *[Symbol.iterator]() { 
-            for (let position = 0; 
-                 position < self.dimension.columns * self.dimension.visibleRows; 
-                 yield position++);
-          }
-        }
-      }
-
       /**
        * Constructs a Positional object.
        * @param {Number} row    = 0 - row index this Positional represents, 
@@ -76,20 +68,32 @@ export class Field {
        *                              supersedes row and column if provided.
        */
       constructor({row = 0, column = 0, primitive} = {}) {
-        if (typeof primitive != typeof undefined) {
-          this.row    = primitive % self.dimension.columns;
-          this.column = Math.floor(primitive / self.dimension.columns);
+        if (primitive !== undefined) {
+          // Remember that a primitive is:
+          //
+          //   primitive = C * rows + R
+          //
+          // Therefore,
+          // 
+          //   R = primitive % rows
+          //   C = floor(primitive / rows)
+          //   
+          this.row    = primitive % self.dimension.rows;
+          this.column = Math.floor(primitive / self.dimension.rows);
         } else {
           [this.row, this.column] = [row, column];
         }
       }
 
       /**
-       * Primitive value of this Positional object. Combines row and column.
+       * Primitive value of this Positional object. A primitive is defined as
        *
-       * This is mostly useful when storing Positionals in Sets and Maps.
+       *                     primitive = C * rows + R
+       *
+       * This is particularly useful when storing Positionals in Sets and Maps,
+       * since they only work well with primitive values.
        */
-      valueOf()   { return this.column * self.dimension.columns + this.row; }
+      get primitive() { return this.column * self.dimension.rows + this.row; }
 
       /** @return a new Positional representing the slot above this Positional. */
       get above() { return new this.constructor({row: this.row + 1, column: this.column     }); }
@@ -99,7 +103,7 @@ export class Field {
       get left()  { return new this.constructor({row: this.row,     column: this.column - 1 }); }
       /** @return a new Positional representing the slot to the right of this Positional. */
       get right() { return new this.constructor({row: this.row,     column: this.column + 1 }); }
-      /** @return a new Positional representing the slot adjacent to this Positional. */
+      /** @return an array of new Positionals representing the slots adjacent to this Positional. */
       get adjacent() { return [this.above, this.below, this.left, this.right]; }
 
       /** @return a new Positional representing the slot at the top of the Field. */
@@ -151,6 +155,15 @@ export class Field {
         }
       }
     }
+  }
+
+  /**
+   * Generates valid positions in this field, in the order of r[0]c[0], r[1]c[0] ... r[max]c[max].
+   */
+  *[Symbol.iterator]() {
+    for (let pos = new this.Positional; pos.valid; pos = pos.right.bottom)
+      for (; pos.valid; pos = pos.above)
+        yield pos;
   }
 
   clone() {

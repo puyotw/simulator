@@ -1,6 +1,8 @@
 <template>
   <pre id="simulator">
-{{ value }}
+{{ field }}
+
+{{ connections }}
   </pre>
 </template>
 
@@ -20,19 +22,21 @@
       Field.Object.BLOCK = new Field.Object.Properties({symbol: 'X', gravityImmune: true});
       Field.Object.IRON = new Field.Object.Properties({symbol: 'x'});
 
-      Field.Object.NUISANCE = new Field.Object.Properties({symbol: 'O', adjacentCleared: () => Field.Object.EMPTY});
+      Field.Object.NUISANCE = new Field.Object.Properties({symbol: 'o', adjacentCleared: () => Field.Object.EMPTY});
       Field.Object.HARD_NUISANCE = new Field.Object.Properties({symbol: 'O', adjacentCleared: () => Field.Object.NUISANCE});
 
+      let keys = Object.keys(Field.Object);
+
       // random obejcts on the field
-      for (let pos = new field.Positional; pos.valid; pos = pos.bottom.right)
-        for (; pos.valid; pos = pos.above)
-            pos.object = Field.Object[Object.keys(Field.Object)[Math.floor(Math.random() * Object.keys(Field.Object).length)]]
+      for (let pos of field)
+        pos.object = Field.Object[keys[Math.floor(Math.random() * keys.length)]]
 
       // some examples how to use the field
       Field.Serializer.toBase64(field).then(console.log);
 
       return {
-        value: Field.Serializer.toAsciiArt(field)
+        field: Field.Serializer.toAsciiArt(field),
+        connections: Field.Algorithm.findConnections(field, {targetObjects: Object.values(Field.Object)})
       }
     }
   }
