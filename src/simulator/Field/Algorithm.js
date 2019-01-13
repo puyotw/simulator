@@ -63,7 +63,7 @@ export default class Algorithm {
       });
   
     return result;
-  };
+  }
   
   /**
    * Execute clearance on an iterable of positionals. This mutates the underlying 
@@ -82,4 +82,4 @@ export default class Algorithm {
       }
     }
   }
-};
+}

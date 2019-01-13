@@ -3,7 +3,7 @@ import Algorithm from './Algorithm.js';
 import Serializer from './Serializer.js';
 import Deserializer from './Deserializer.js';
 
-export class Field {
+export default class Field {
   /**
    * Enums of valid objects.
    * More objects can be added using as follows:

@@ -59,7 +59,7 @@ class PrefixTreeNode {
       return new this({branches:[this.from(istream), this.from(istream)]});
     } else {
       // when reconstructing the tree from istream, frequency doesn't matter anymore
-      return new this({entry:[istream.read(8), 0]});
+      return new this({entry:[String.fromCharCode(istream.read(8)), 0]});
     }
   }
 
@@ -122,6 +122,7 @@ export default class PrefixTree {
     for (var node = this.#root; 
          !node.isLeaf(); 
          node = istream.read(1) === PrefixTree.LEFT ? node.left : node.right);
+    console.log(node.symbol);
     return node.symbol;
   }
 

@@ -22,7 +22,7 @@ export default function(Field) {
     return rows.join('\n');
   };
 
-  Serializer.toBlob = function(field) {
+  Serializer.toBitStream = function(field, ostream = new BitStreamWriter()) {
     // count occurrence of objects on field
     let frequencies = {};
     for (let pos = new field.Positional; pos.valid; pos = pos.bottom.right) {
@@ -33,7 +33,6 @@ export default function(Field) {
     }
 
     let encodingTree = new PrefixTree(frequencies);
-    let ostream = new BitStreamWriter();
 
     // header:
     //   uint8   - dimension.columns
@@ -51,32 +50,9 @@ export default function(Field) {
     //                              Order is c[0]r[0], c[0]r[1], ..., c[max]r[max]
 
     let encoding = encodingTree.encoding();
-    for (let pos = new field.Positional; pos.valid; pos = pos.bottom.right) {
-      for (; pos.valid; pos = pos.above) {
-        encoding[pos.object.symbol](ostream);
-      }
-    }
-    return ostream.toBlob()
-  };
+    for (let pos of field) encoding[pos.object.symbol](ostream);
 
-  Serializer.toBase64 = async function(field) {
-    let blob = Serializer.toBlob(field);
-    return new Promise(resolve => {
-      // using FileReader to convert to base64,
-      // because btoa doesn't work with binary strings;
-      // it is unfortunate that FileReader is asynchronous, while it doesn't have to
-      // since our blob is not really a File.
-      let freader = new FileReader();
-      freader.onload = function (evt) {
-        // url format: data:application/octet-stream;base64,<actual base64 here>
-        let url = evt.target.result;
-        let metadataEnd = url.indexOf(',');
-        resolve(metadataEnd === -1 ? '' : url.slice(metadataEnd + 1));
-      };
-      
-      freader.readAsDataURL(blob);
-    });
-
+    return ostream;
   };
 
   return Serializer;

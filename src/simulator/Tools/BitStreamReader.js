@@ -1,22 +1,42 @@
-const CHAR_BIT = 16;
+const CHAR_BIT = 8;
+
+const Base64 = require('base64-js');
 
 export default class BitStreamReader {
   #buffer = 0;
   #bitsInBuffer = 0;
-  #streamToBeRead;
+  #stream;
 
-  constructor(streamToBeRead) {
-    this.#streamToBeRead = new Uint8Array(streamToBeReader);
+  /**
+   * Constructs this BitStreamReader.
+   *
+   * @param {String} base64 - the base64-encoded string that contains binary
+   *                          data for this stream to read.
+   */
+  constructor(base64) {
+    this.#stream = Array.from(Base64.toByteArray(base64));
   }
 
+  /**
+   * Reads some bits from the stream.
+   *
+   * @param {Number} bitCount - The number of bits to read from the stream.
+   * 
+   * @return {Number} a number with the first bitCount-bits containing the
+   *                  data read from the stream. 
+   *                  0 for any nonpositive bitCount.
+   *                  undefined if stream is already empty.
+   */
   read(bitCount) {
-    if (bitCount <= 0) return undefined;
-    if (this.#bitsInBuffer === 0) {
-      // buffer has nothing, populate it
-      if (this.#streamToBeRead.length === 0) return undefined;
+    // caller wants 0 bit, just don't do anything
+    if (bitCount <= 0) return 0;
 
-      this.#buffer = this.#streamToBeRead[0];
-      this.#streamToBeRead = this.#streamToBeRead.slice(1);
+    // buffer has nothing, populate it
+    if (this.#bitsInBuffer === 0) {
+      // stream has nothing, no more bit to read
+      if (this.#stream.length === 0) return undefined;
+
+      this.#buffer = this.#stream.shift();
       this.#bitsInBuffer = CHAR_BIT;
     }
 
