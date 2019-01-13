@@ -66,16 +66,19 @@ export default class Algorithm {
   };
   
   /**
-   * Execute clearance on a collection of positionals.
+   * Execute clearance on an iterable of positionals. This mutates the underlying 
+   * field(s) that the positionals belong to.
+   *
+   * Technically, the positionals can come from different fields.
    *
    * @param {[Field.Positional, ...]} - an array of positionals pointing to 
    *                                    objects that are about to be cleared.
    */
   static clearConnections(positionals) {
-    for (const positional of positionals) {
-      positional.object = positional.object.cleared(positional)
-      for (const adjacent of positional.adjacent) {
-        adjacent.object = adjacent.object.adjacentClear(adjacent);
+    for (const pos of positionals) {
+      pos.object = pos.object.cleared(pos)
+      for (const adj of pos.adjacent) {
+        if (adj.valid) adj.object = adj.object.adjacentCleared(adj);
       }
     }
   }

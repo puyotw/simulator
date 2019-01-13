@@ -121,6 +121,9 @@ export class Field {
       get valid() { return (0 <= this.row    && this.row    < self.dimension.rows   ) && 
                            (0 <= this.column && this.column < self.dimension.columns); }
 
+      /** @return the underlying Field this Positional belongs to. */
+      get field() { return self; }
+
       /**
        * @return {Field.Object} the type of field object at this position if position is valid;
        *                         undefined otherwise. */
@@ -186,16 +189,15 @@ export class Field {
     // for each column, p1 inspects every slot from bottom up, 
     //                  p2 swaps with p1 if p1 contains a field object, 
     //                     then changes to point at one slot up
-    for (let [p1, p2] = [ new this.Positional(), new this.Positional() ]; 
+    for (let [p1, p2] = [new this.Positional, new this.Positional]; 
          p1.valid; 
-         [p1, p2] = [ p1.right.bottom, p2.right.bottom ]) {
+         [p1, p2] = [p1.right.bottom, p2.right.bottom]) {
       for (; p1.valid; p1 = p1.above) {
         const p1Obj = p1.object;
         if (p1Obj === this.constructor.Object.EMPTY) continue;
 
         // for gravity-immune objects, nothing should fall below them,
-        // equate p2 and p1, to prepare to copy the object from this to new,
-        // at the exact position
+        // equate p2 and p1, as if p1 were the bottom of the field
         if (p1Obj.gravityImmune) p2.row = p1.row;
 
         // swap objects in p1 and p2
