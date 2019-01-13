@@ -1,5 +1,5 @@
-import { FieldObject } from './FieldObject.js';
-import * as Algorithm from './Algorithm.js';
+import FieldObject from './FieldObject.js';
+import Algorithm from './Algorithm.js';
 import Serializer from './Serializer.js';
 import Deserializer from './Deserializer.js';
 

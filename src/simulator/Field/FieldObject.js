@@ -1,4 +1,5 @@
-export const FieldObject = {};
+const FieldObject = {};
+export default FieldObject;
 
 Object.defineProperty(FieldObject, 'Properties', {
   value : class {
