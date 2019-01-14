@@ -139,7 +139,6 @@
         const clear_animation = tl_arr.map(async (obj) => { return this.timelinePromise(obj[0],obj[1],"clear"); });
         // wait all timelines completed
         await Promise.all(clear_animation);
-        console.table(this.pixifield);
         return true;
       },
       loadbg(){
