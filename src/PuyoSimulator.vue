@@ -1,32 +1,39 @@
 <template>
-  <pre id="simulator">
-original field:
-{{ field }}
+  <div id="simulator">
+    <PuyoSim :base64="base64" :minConnection="4" />
+    <pre>
+      original field:
+      {{ field }}
 
-base64: {{ base64 }}
+      base64: {{ base64 }}
 
-decoded field from base64:
-{{ decoded }}
+      decoded field from base64:
+      {{ decoded }}
 
-gravitated field:
-{{ gravitated }}
+      gravitated field:
+      {{ gravitated }}
 
-cleared field:
-{{ cleared }}
+      cleared field:
+      {{ cleared }}
 
-connections in gravitated original field:
-{{ connections }}
+      connections in gravitated original field:
+      {{ connections }}
 
-gravitational diff:
-{{ gravDiff }}
-  </pre>
+      gravitational diff:
+      {{ gravDiff }}
+    </pre>
+  </div>
 </template>
 
 <script>
+  import PuyoSim from './PuyoSimulatorpixi.vue'
   import Field from './simulator/Field/Field.js';
   import BitStreamReader from './simulator/Tools/BitStreamReader.js';
 
   export default {
+    components: {
+    PuyoSim,
+    },
     data() {
       let field = new Field;
 
@@ -42,14 +49,20 @@ gravitational diff:
       Field.Object.NUISANCE = new Field.Object.Properties({symbol: 'o', adjacentCleared: () => Field.Object.EMPTY});
       Field.Object.HARD_NUISANCE = new Field.Object.Properties({symbol: 'O', adjacentCleared: () => Field.Object.NUISANCE});
 
-      // for simplicity, only put these objects into our random field,
-      // EMPTY is more likely to appear in field since it appears more in here
-      let keys = ['RED', 'YELLOW', 'HARD_NUISANCE',
-                  'EMPTY', 'EMPTY', 'EMPTY'];
-
-      // random obejcts on the field
-      for (let pos of field)
-        pos.object = Field.Object[keys[Math.floor(Math.random() * keys.length)]]
+      let keys = ['RED', 'YELLOW', 'BLUE','GREEN','PURPLE',
+                  'EMPTY'];
+      let gtr = [0,3,3,1,1,3,5,5,5,5,5,5,5,
+                 0,3,0,1,0,1,5,5,5,5,5,5,5,
+                 2,0,2,0,0,3,0,5,5,5,5,5,5,
+                 3,2,1,2,3,1,3,5,5,5,5,5,5,
+                 3,2,3,1,2,1,3,5,5,5,5,5,5,
+                 1,3,1,2,2,1,5,1,5,5,5,5,5];
+      // GTR on the field
+      let iter = 0;
+      for (let pos of field){
+        pos.object = Field.Object[keys[gtr[iter]]]
+        iter++;
+      }
 
       // find base64 encoding
       let base64 = Field.Serializer.toBitStream(field).finalize();
@@ -65,12 +78,12 @@ gravitational diff:
       // prepares a new field to execute clearance on
       let cleared = gravitated.clone();
 
-      // find RED connections >= 3 in gravitated field
+      // find RED connections >= 4 in gravitated field
       let connections = Field.Algorithm.findConnections(cleared, {
-          // only find RED connections
-          targetObjects: [Field.Object.RED],
-          // find connections >= 3
-          minConnection: 3
+          // only ALL COLORS connections
+          targetObjects: [Field.Object.RED,Field.Object.BLUE,Field.Object.GREEN,Field.Object.YELLOW,Field.Object.PURPLE],
+          // find connections >= 4
+          minConnection: 4
       });
       
       // a convenience flatten function to flatten connections map
@@ -95,4 +108,7 @@ gravitational diff:
 </script>
 
 <style>
+#simulator{
+  display:flex;
+}
 </style>

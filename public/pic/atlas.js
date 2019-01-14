@@ -1,3 +1,4 @@
+// script for create skin.json atlas file
 var fs = require('fs');
 
 let data = {"meta": {
