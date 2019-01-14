@@ -3,6 +3,19 @@ import Algorithm from './Algorithm.js';
 import Serializer from './Serializer.js';
 import Deserializer from './Deserializer.js';
 
+/**
+ * Indicates which bit to turn on for which direction of connection.
+ *
+ * Refer to Field.prototype.Positional.prototype.connections for a more
+ * detailed description.
+ */
+const ConnectionBitField = {
+  BELOW : 1 << 0,
+  ABOVE : 1 << 1,
+  RIGHT : 1 << 2,
+  LEFT  : 1 << 3,
+};
+
 export default class Field {
   /**
    * Enums of valid objects.
@@ -135,8 +148,28 @@ export default class Field {
       get field() { return self; }
 
       /**
+       * Returns a connection bit field.
+       *
+       * A connection bit field is a 4-bit Number that stores whether adjacent
+       * slots contain the same object as this slot.
+       *
+       * This information is most useful for determining sprite coordinates.
+       * For normal use case of checking whether this slot is connected to some
+       * adjacent slot, use other getters and check object equality instead.
+       *
+       * @return a connection bit field about this Positional.
+       */
+      get connections() {
+        return 0 | (this.below.object == this.object ? ConnectionBitField.BELOW : 0)
+                 | (this.above.object == this.object ? ConnectionBitField.ABOVE : 0)
+                 | (this.right.object == this.object ? ConnectionBitField.RIGHT : 0)
+                 | (this.left.object  == this.object ? ConnectionBitField.LEFT  : 0);
+      }
+
+      /**
        * @return {Field.Object} the type of field object at this position if position is valid;
-       *                         undefined otherwise. */
+       *                         undefined otherwise.
+       */
       get object() {
         if (!this.valid) return undefined;
 
