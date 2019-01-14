@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "pixi.js": "^4.8.5",
     "tinyqueue": "^2.0.0",
     "vue": "^2.5.21"
   },
