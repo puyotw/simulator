@@ -6,18 +6,28 @@ import Deserializer from './Deserializer.js';
 export default class Field {
   /**
    * Enums of valid objects.
-   * More objects can be added using as follows:
+   * More objects can be added as follows:
    *
    *    Field.Object.NEW_OBJECT = new Field.Object.Properties({...});
    *
    * where the valid options are documented in './FieldObject.js'
-   *
-   * @return the enums of objects in the field.
    */
-  static get Object() { return FieldObject; }
-  static get Algorithm() { return Algorithm; }
-  static get Serializer() { return Serializer(Field); }
-  static get Deserializer() { return Deserializer(Field); }
+  static Object = FieldObject;
+
+  /**
+   * Common algorithms to run on a field.
+   */
+  static Algorithm = Algorithm;
+
+  /**
+   * Serializes the Field to various other format for display or storage.
+   */
+  static Serializer = Serializer(Field);
+
+  /**
+   * Deserializes serialized data back to a Field.
+   */
+  static Deserializer = Deserializer(Field);
 
   /** 
    * Stores field data. Clients shall not hand modify this.
@@ -173,40 +183,5 @@ export default class Field {
     let cloned = new this.constructor(this.dimension);
     cloned.#data = this.#data.map(column => column !== undefined ? column.slice() : undefined);
     return cloned;
-  }
-
-  /**
-   * Modifies this Field with gravity applied to all objects, except if the object is
-   * gravity immune.
-   *
-   * @return this Field object.
-   */
-  gravitate() {
-    // 2-pointer swap approach:
-    // pointer 1(p1) iterates through whole column, 
-    // pointer 2(p2) points to either an EMPTY slot or the same slot as p1;
-    //
-    // for each column, p1 inspects every slot from bottom up, 
-    //                  p2 swaps with p1 if p1 contains a field object, 
-    //                     then changes to point at one slot up
-    for (let [p1, p2] = [new this.Positional, new this.Positional]; 
-         p1.valid; 
-         [p1, p2] = [p1.right.bottom, p2.right.bottom]) {
-      for (; p1.valid; p1 = p1.above) {
-        const p1Obj = p1.object;
-        if (p1Obj === this.constructor.Object.EMPTY) continue;
-
-        // for gravity-immune objects, nothing should fall below them,
-        // equate p2 and p1, as if p1 were the bottom of the field
-        if (p1Obj.gravityImmune) p2.row = p1.row;
-
-        // swap objects in p1 and p2
-        [p1.object, p2.object] = [p2.object, p1.object];
-        // move p2 up one slot
-        p2 = p2.above;
-      }
-    }
-
-    return this;
   }
 }

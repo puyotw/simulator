@@ -122,7 +122,6 @@ export default class PrefixTree {
     for (var node = this.#root; 
          !node.isLeaf(); 
          node = istream.read(1) === PrefixTree.LEFT ? node.left : node.right);
-    console.log(node.symbol);
     return node.symbol;
   }
 

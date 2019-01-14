@@ -14,11 +14,11 @@ gravitated field:
 cleared field:
 {{ cleared }}
 
-cleared field then gravitated:
-{{ clearedGravitated }}
-
 connections in gravitated original field:
 {{ connections }}
+
+gravitational diff:
+{{ gravDiff }}
   </pre>
 </template>
 
@@ -45,7 +45,7 @@ connections in gravitated original field:
       // for simplicity, only put these objects into our random field,
       // EMPTY is more likely to appear in field since it appears more in here
       let keys = ['RED', 'YELLOW', 'HARD_NUISANCE',
-                  'RED', 'EMPTY', 'EMPTY'];
+                  'EMPTY', 'EMPTY', 'EMPTY'];
 
       // random obejcts on the field
       for (let pos of field)
@@ -58,7 +58,10 @@ connections in gravitated original field:
       let decoded = Field.Deserializer.fromBitStream(new BitStreamReader(base64));
 
       // applies gravity to original field
-      let gravitated = field.clone().gravitate();
+      let gravitated = field.clone();
+      let gravitationalDiff = Field.Algorithm.gravitationalDiff(gravitated);
+      gravitationalDiff.apply();
+
       // prepares a new field to execute clearance on
       let cleared = gravitated.clone();
 
@@ -74,8 +77,9 @@ connections in gravitated original field:
       let flatten = arrs => arrs.reduce((acc, arr) => acc.concat(arr), []);
       let flattenedConnections = flatten(flatten(Array.from(connections.values())));
         
-      // execute clearance, modifies `cleared`
-      Field.Algorithm.clearConnections(flattenedConnections);
+      // execute clearance
+      Field.Algorithm.clearingDiff(flattenedConnections)
+                     .forEach(diff => diff.apply());
 
       return {
         field: Field.Serializer.toAsciiArt(field),
@@ -84,7 +88,7 @@ connections in gravitated original field:
         connections: connections,
         gravitated: Field.Serializer.toAsciiArt(gravitated),
         cleared: Field.Serializer.toAsciiArt(cleared),
-        clearedGravitated: Field.Serializer.toAsciiArt(cleared.gravitate()),
+        gravDiff: gravitationalDiff,
       }
     }
   }
