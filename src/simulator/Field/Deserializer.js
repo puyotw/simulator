@@ -1,10 +1,16 @@
+import PrefixTree from '../Tools/PrefixTree.js';
+
 export default function(Field) {
   let Deserializer = {};
 
-  Deserializer.fromAsciiArt = function(stream) {
-    // creates a mapping from Field Object symbol to Field Object
-    const sym2obj = Object.values(Field.Object).reduce((mapping, obj) => (mapping[obj.symbol] = obj, mapping), {});
+  /** @return a mapping from Field Object symbol to values in Field.Object. */
+  const getSymbolToObjectMapping = function() {
+    return Object.values(Field.Object)
+                 .reduce((mapping, obj) => (mapping[obj.symbol] = obj, mapping), {});
+  };
 
+  Deserializer.fromAsciiArt = function(stream) {
+    let sym2obj = getSymbolToObjectMapping();
     let rows = stream.split('\n');
     let field = new Field({
       // last row is just decoration, not considering in deserialization;
@@ -23,13 +29,41 @@ export default function(Field) {
       // remove 3 character wall on both sides
       let rowNoWalls = row.slice(3, -3);
       // extract symbol char from row string
-      for (let [symbol, _, ...rest] = rowNoWalls; rest.length > 0; [symbol, _, ...rest] = rest) {
+      for (let [symbol, _, ...rest] = rowNoWalls;
+           rest.length > 0;
+           [symbol, _, ...rest] = rest
+      ) {
         pos.object = sym2obj[symbol];
         pos = pos.right;
       }
       pos = pos.farLeft.below;
     }
   
+    return field;
+  };
+
+  Deserializer.fromBitStream = function(istream) {
+    // header:
+    //   uint8   - dimension.columns
+    //   uint8   - dimension.visibleRows
+    //   uint8   - dimension.hiddenRows
+    //   custom  - encoding tree structure
+
+    let field = new Field({
+      columns     : istream.read(8),
+      visibleRows : istream.read(8),
+      hiddenRows  : istream.read(8), 
+    });
+
+    let encodingTree = PrefixTree.from(istream);
+
+    // field data:
+    //   encode(object.symbol)... - encoded symbols. 
+    //                              Order is c[0]r[0], c[0]r[1], ..., c[max]r[max]
+   
+    let sym2obj = getSymbolToObjectMapping();
+    for (let pos of field) pos.object = sym2obj[encodingTree.symbolFromStream(istream)];
+
     return field;
   };
 

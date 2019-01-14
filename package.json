@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "pixi.js": "^4.8.5",
+    "base64-js": "^1.3.0",
     "tinyqueue": "^2.0.0",
     "vue": "^2.5.21"
   },
@@ -34,7 +35,8 @@
       "no-unused-vars": [
         "error",
         {
-          "argsIgnorePattern": "^_"
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_"
         }
       ]
     },

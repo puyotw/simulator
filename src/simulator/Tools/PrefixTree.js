@@ -59,7 +59,7 @@ class PrefixTreeNode {
       return new this({branches:[this.from(istream), this.from(istream)]});
     } else {
       // when reconstructing the tree from istream, frequency doesn't matter anymore
-      return new this({entry:[istream.read(8), 0]});
+      return new this({entry:[String.fromCharCode(istream.read(8)), 0]});
     }
   }
 
