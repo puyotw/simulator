@@ -40,9 +40,9 @@ export default function(Field) {
     //   uint8   - dimension.hiddenRows
     //   custom  - encoding tree structure
     
-    ostream.write({value: field.dimension.columns, writeBitCount: 8});
-    ostream.write({value: field.dimension.visibleRows, writeBitCount: 8});
-    ostream.write({value: field.dimension.hiddenRows, writeBitCount: 8});
+    ostream.write({ value: field.dimension.columns, writeBitCount: 8 });
+    ostream.write({ value: field.dimension.visibleRows, writeBitCount: 8 });
+    ostream.write({ value: field.dimension.hiddenRows, writeBitCount: 8 });
     encodingTree.to(ostream);
 
     // field data:

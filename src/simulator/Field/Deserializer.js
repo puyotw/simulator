@@ -19,7 +19,7 @@ export default function(Field) {
       // length / 2 -> every symbol is followed by a space, i.e. every symbol takes 2 characters
       columns: Math.ceil(rows.pop().slice(3, -3).length / 2),
       // count the number of rows where first character is a space
-      hiddenRows: (function(count) { for (let row of rows) if (row[0] == ' ') ++count ; else break; return count; })(0),
+      hiddenRows: (function(count) { for (let row of rows) if (row[0] == ' ') ++count; else break; return count; })(0),
       visibleRows: rows.length - this.hiddenRows
     });
   

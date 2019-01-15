@@ -25,7 +25,7 @@ export default class BitStreamWriter {
    * @param {Number} writeBitCount - number of least significant bits from value
    *                                 to be written to this stream.
    */
-  write({value, writeBitCount}) {
+  write({ value, writeBitCount }) {
     if (writeBitCount <= 0) return;
 
     // write leftmost bit to buffer,
@@ -38,7 +38,7 @@ export default class BitStreamWriter {
     if (++this.#bitsInBuffer % CHAR_BIT === 0) this.#flush();
 
     // recurse if we need to write more than 1 bit
-    this.write({value: value, writeBitCount: writeBitCount - 1});
+    this.write({ value: value, writeBitCount: writeBitCount - 1 });
   }
 
   /**

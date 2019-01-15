@@ -42,4 +42,4 @@ Object.defineProperty(FieldObject, 'Properties', {
 Object.defineProperty(FieldObject, 'EMPTY', {
   value : new FieldObject.Properties({ gravityImmune : true, symbol : ' ' }),
   enumerable : true,
-})
+});

@@ -90,7 +90,7 @@ export default class Field {
        * @param {Number} primitive  - combined row and column this Positional represents,
        *                              supersedes row and column if provided.
        */
-      constructor({row = 0, column = 0, primitive} = {}) {
+      constructor({ row = 0, column = 0, primitive } = {}) {
         if (primitive !== undefined) {
           // Remember that a primitive is:
           //
@@ -119,24 +119,24 @@ export default class Field {
       get primitive() { return this.column * self.dimension.rows + this.row; }
 
       /** @return a new Positional representing the slot above this Positional. */
-      get above() { return new this.constructor({row: this.row + 1, column: this.column     }); }
+      get above() { return new this.constructor({ row: this.row + 1, column: this.column     }); }
       /** @return a new Positional representing the slot below this Positional. */
-      get below() { return new this.constructor({row: this.row - 1, column: this.column     }); }
+      get below() { return new this.constructor({ row: this.row - 1, column: this.column     }); }
       /** @return a new Positional representing the slot to the left of this Positional. */
-      get left()  { return new this.constructor({row: this.row,     column: this.column - 1 }); }
+      get left()  { return new this.constructor({ row: this.row,     column: this.column - 1 }); }
       /** @return a new Positional representing the slot to the right of this Positional. */
-      get right() { return new this.constructor({row: this.row,     column: this.column + 1 }); }
+      get right() { return new this.constructor({ row: this.row,     column: this.column + 1 }); }
       /** @return an array of new Positionals representing the slots adjacent to this Positional. */
       get adjacent() { return [this.above, this.below, this.left, this.right]; }
 
       /** @return a new Positional representing the slot at the top of the Field. */
-      get top()      { return new this.constructor({row: self.dimension.rows - 1, column: this.column                }); }
+      get top()      { return new this.constructor({ row: self.dimension.rows - 1, column: this.column                }); }
       /** @return a new Positional representing the slot at the far left of the Field. */
-      get farRight() { return new this.constructor({row: this.row,                column: self.dimension.columns - 1 }); }
+      get farRight() { return new this.constructor({ row: this.row,                column: self.dimension.columns - 1 }); }
       /** @return a new Positional representing the slot at the bottom of the Field. */
-      get bottom()   { return new this.constructor({row: 0,                       column: this.column                }); }
+      get bottom()   { return new this.constructor({ row: 0,                       column: this.column                }); }
       /** @return a new Positional representing the slot at the far left of the Field. */
-      get farLeft()  { return new this.constructor({row: this.row,                column: 0                          }); }
+      get farLeft()  { return new this.constructor({ row: this.row,                column: 0                          }); }
 
       /** @return true if this position is in the hidden rows; false otherwise. */
       get hidden() { return self.dimension.visibleRows <= this.row && this.row < self.dimension.rows; }
@@ -200,7 +200,7 @@ export default class Field {
           self.#data[column][row] = obj;
         }
       }
-    }
+    };
   }
 
   /**
