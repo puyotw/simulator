@@ -9,7 +9,7 @@
 <script>
   import * as PIXI from 'pixi.js'
   import {TimelineMax} from "gsap/TweenMax";
-  import PixiPlugin from "gsap/PixiPlugin";
+  import PixiPlugin from "gsap/PixiPlugin"; // eslint-disable-line no-unused-vars
   import Field from './simulator/Field/Field.js';
   import BitStreamReader from './simulator/Tools/BitStreamReader.js';
   export default {

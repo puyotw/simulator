@@ -1,0 +1,31 @@
+{
+  "root": true,
+  "env": {
+    "node": true
+  },
+  "extends": [
+    "plugin:vue/essential",
+    "eslint:recommended"
+  ],
+  "rules": {
+    "no-unused-vars": [
+      "error",
+      {
+        "args": "none",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "keyword-spacing": ["error"],
+    "quotes": ["error", "single", { "avoidEscape": true }],
+    "quote-props": ["error", "as-needed"],
+    "semi": ["error", "always"],
+    "space-infix-ops": "error",
+    "object-curly-spacing": ["error", "always"],
+    "space-unary-ops": ["error", { "words": true, "nonwords": false }],
+    "comma-spacing": ["error", { "before": false, "after": true }],
+    "semi-spacing": "error"
+  },
+  "parserOptions": {
+    "parser": "babel-eslint"
+  }
+}

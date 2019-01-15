@@ -33,7 +33,7 @@ export default class Diff {
     TRANSFORM : {},
   }
 
-  constructor({type, positional, argument}) {
+  constructor({ type, positional, argument }) {
     this.positional = positional;
     switch (this.type = type) {
       case Diff.Type.TRANSFORM: this.newObject = argument;       break;

@@ -15,7 +15,7 @@ class PrefixTreeNode {
            node1.frequency > node2.frequency ?  1 :
               node1.symbol < node2.symbol    ? -1 :
               node1.symbol > node2.symbol    ?  1 :
-                                                0 ;
+                                                0;
   }
   
   /**
@@ -29,7 +29,7 @@ class PrefixTreeNode {
    *        Supersedes entry if provided. This node will be a branch node with 
    *        left and right assigned to the given nodes.
    */
-  constructor({entry:[symbol, frequency] = [], branches:[left, right] = []}) {
+  constructor({ entry:[symbol, frequency] = [], branches:[left, right] = [] }) {
     if (!left || !right) {
       this.symbol = symbol;
       this.frequency = frequency;
@@ -56,10 +56,10 @@ class PrefixTreeNode {
    */
   static from(istream) {
     if (istream.read(1) === this.BRANCH) {
-      return new this({branches:[this.from(istream), this.from(istream)]});
+      return new this({ branches:[this.from(istream), this.from(istream)] });
     } else {
       // when reconstructing the tree from istream, frequency doesn't matter anymore
-      return new this({entry:[String.fromCharCode(istream.read(8)), 0]});
+      return new this({ entry:[String.fromCharCode(istream.read(8)), 0] });
     }
   }
 
@@ -68,10 +68,10 @@ class PrefixTreeNode {
    */
   to(ostream) {
     if (this.isLeaf()) {
-      ostream.write({value: PrefixTreeNode.LEAF, writeBitCount: 1});
-      ostream.write({value: this.symbol.charCodeAt(0), writeBitCount: 8});
+      ostream.write({ value: PrefixTreeNode.LEAF, writeBitCount: 1 });
+      ostream.write({ value: this.symbol.charCodeAt(0), writeBitCount: 8 });
     } else {
-      ostream.write({value: PrefixTreeNode.BRANCH, writeBitCount: 1});
+      ostream.write({ value: PrefixTreeNode.BRANCH, writeBitCount: 1 });
       this.left.to(ostream);
       this.right.to(ostream);
     }
@@ -105,10 +105,10 @@ export default class PrefixTree {
    *        An object mapping from the symbol character to its frequencies.
    */ 
   constructor(frequencies) {
-    let queue = new TinyQueue(Object.entries(frequencies).map(entry => new PrefixTreeNode({entry:entry})), 
+    let queue = new TinyQueue(Object.entries(frequencies).map(entry => new PrefixTreeNode({ entry:entry })), 
                               PrefixTreeNode.comparator);
     while (queue.length > 1) {
-      queue.push(new PrefixTreeNode({branches:[queue.pop(), queue.pop()]}));
+      queue.push(new PrefixTreeNode({ branches:[queue.pop(), queue.pop()] }));
     }
 
     this.#root = queue.pop();
@@ -143,7 +143,7 @@ export default class PrefixTree {
       // to ostream after writing the previous encoding, i.e. prefix.
       const appendBit = bit => function(ostream) {
         writePrefix(ostream);
-        ostream.write({value: bit, writeBitCount: 1});
+        ostream.write({ value: bit, writeBitCount: 1 });
       };
       this.encoding(map, node.left, appendBit(PrefixTree.LEFT));
       this.encoding(map, node.right, appendBit(PrefixTree.RIGHT));

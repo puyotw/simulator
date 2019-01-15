@@ -17,7 +17,7 @@ export default class Algorithm {
    *         positions that are connected. No one position can appear in two different
    *         subarrays.
    */
-  static findConnections(field, {targetObjects, minConnection = 1, onlyVisible = true}) {
+  static findConnections(field, { targetObjects, minConnection = 1, onlyVisible = true }) {
     let result = new Map(targetObjects.map(obj => [ obj, [] ]));
   
     // keeps track of all positions to be visited
@@ -25,7 +25,7 @@ export default class Algorithm {
       // using "forEach" like "while set not empty",
       // i.e. "while there are more positions to visit"
       .forEach(function (primitivePosition, _, toVisit) {
-        const position = new field.Positional({primitive: primitivePosition});
+        const position = new field.Positional({ primitive: primitivePosition });
         const targetObject = position.object;
   
         if (// position is in one of the hidden rows, and user says find only visible ones

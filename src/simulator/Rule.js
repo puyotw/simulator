@@ -11,4 +11,4 @@ export function Rule({
   this.mode = Object.values(GameModes).includes(mode) ? mode : GameModes.TSU;
   this.colors = 1 <= colors && colors <= 5 ? colors : 4;
   this.targetPoint = Math.max(10, targetPoint);
-};
+}
