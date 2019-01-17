@@ -1,9 +1,5 @@
 <template>
-  <div>
-    <div id="puyostage"></div>
-    <button v-on:click.stop="play">PLAY</button>
-    <button v-on:click.stop="step">STEP</button>
-  </div>
+  <div id="puyostage"></div>
 </template>
 
 <script>
@@ -12,13 +8,17 @@
   import PixiPlugin from 'gsap/PixiPlugin'; // eslint-disable-line no-unused-vars
   import Field from './simulator/Field/Field.js';
   import BitStreamReader from './simulator/Tools/BitStreamReader.js';
-  import { BLOCK_WIDTH, RECOVER_FRAME } from './simulator/Constant';
+  import { BLOCK_WIDTH, RECOVER_FRAME, STATE_IDLE, STATE_PLAY, STATE_STEP, STATE_RESET, STATE_END } from './simulator/Constant';
 
   export default {
     name: 'PuyoSim',
     data() {
       return {
         app: null,
+        container: {
+          bg: null,
+          puyo: null,
+        },
         field: null,
         pixifield: null,
         playable: true,
@@ -26,7 +26,38 @@
     },
     props:{
       base64: String,
-      minConnection: Number,
+      state: String,
+    },
+    watch: {
+      state(newState, oldState){
+        switch (newState) {
+          case STATE_PLAY:
+              if ( oldState === STATE_IDLE) {
+                this.play();
+              } else {
+                this.$emit('update:state', STATE_IDLE);
+              }
+            break;
+          case STATE_STEP:
+              if ( oldState === STATE_IDLE) {
+                this.step();
+              } else {
+                this.$emit('update:state', STATE_IDLE);
+              }
+            break;
+          case STATE_RESET:
+              if ( oldState === STATE_IDLE) {
+                this.reset();
+              } else {
+                this.$emit('update:state', STATE_IDLE);
+              }
+            break;
+          case STATE_IDLE:
+          case STATE_END:
+          default:
+            break;
+        }
+      },
     },
     methods: {
       timelinePromise(timeline, diff, state) {
@@ -41,24 +72,34 @@
         });
       },
       async step(){
-        if (!this.playable) {
+        if (this.state === STATE_END) {
           return;
         }
-        let condition = this.playable;
-        this.playable = false;
-        condition = await this.gravity() || await this.clear();
-        this.playable = condition;
+        let condition = await this.gravity() || await this.clear();
+        if (condition){
+          this.$emit('update:state', STATE_IDLE);
+        } else {
+          this.$emit('update:state', STATE_END);
+        }
       },
       async play(){
-        if (!this.playable) {
-          return;
-        }
-        let condition = this.playable;
-        this.playable = false;
+        let condition = (this.state !== STATE_END);
         while (condition) {
-          condition = await this.gravity() || await this.clear();
+          if (this.state === STATE_PLAY) {
+            condition = await this.gravity() || await this.clear();
+          } else {
+            return;
+          }
         }
-        this.playable = condition;
+        this.$emit('update:state', STATE_END);
+      },
+      reset(){
+        for (var i = this.container.puyo.children.length - 1; i >= 0; i--) {
+          this.container.puyo.removeChild(this.container.puyo.children[i]);
+        }
+        this.field = Field.Deserializer.fromBitStream(new BitStreamReader(this.base64));
+        this.loadpuyo();
+        this.$emit('update:state', STATE_IDLE);
       },
       async gravity(){
         let tl_arr = [];
@@ -109,7 +150,7 @@
         // set connections
         let connections = Field.Algorithm.findConnections(this.field, {
             targetObjects: [Field.Object.RED, Field.Object.BLUE, Field.Object.GREEN, Field.Object.YELLOW, Field.Object.PURPLE],
-            minConnection: this.minConnection
+            minConnection: 4
         });
         let flatten = arrs => arrs.reduce((acc, arr) => acc.concat(arr), []);
         let flattenedConnections = flatten(flatten(Array.from(connections.values())));
@@ -124,7 +165,7 @@
             0.1, 
             { pixi:{ alpha:0.5 }, repeat:5, yoyo:true, onComplete:()=>{
               // remove sprite when clear animation complete
-              this.app.stage.removeChild(this.pixifield[diff.positional.row][diff.positional.column]);
+              this.container.puyo.removeChild(this.pixifield[diff.positional.row][diff.positional.column]);
               this.pixifield[diff.positional.row][diff.positional.column] = null;
               }
             },
@@ -146,26 +187,26 @@
             this.app.screen.width,
             this.app.screen.height
         );
-        this.app.stage.addChild(bg);
+        this.container.bg.addChild(bg);
         let bgleft = new PIXI.extras.TilingSprite(
             bgtex['bgleft'],
             48,
             this.app.screen.height
         );
-        this.app.stage.addChild(bgleft);
+        this.container.bg.addChild(bgleft);
         let bgtop = new PIXI.extras.TilingSprite(
             bgtex['bgtop'],
             this.app.screen.width,
             48
         );
-        this.app.stage.addChild(bgtop);
+        this.container.bg.addChild(bgtop);
         let pole1_left = new PIXI.extras.TilingSprite(
             bgtex['pole1'],
             BLOCK_WIDTH,
             this.app.screen.height
         );
         pole1_left.y = this.field.dimension.hiddenRows * BLOCK_WIDTH;
-        this.app.stage.addChild(pole1_left);
+        this.container.bg.addChild(pole1_left);
         let pole1_right = new PIXI.extras.TilingSprite(
             bgtex['pole1'],
             BLOCK_WIDTH,
@@ -173,14 +214,14 @@
         );
         pole1_right.x = this.app.screen.width - BLOCK_WIDTH;
         pole1_right.y = this.field.dimension.hiddenRows * BLOCK_WIDTH;
-        this.app.stage.addChild(pole1_right);
+        this.container.bg.addChild(pole1_right);
         let pole0_left = new PIXI.Sprite(bgtex['pole0']);
         pole0_left.y = this.field.dimension.hiddenRows * BLOCK_WIDTH;
-        this.app.stage.addChild(pole0_left);
+        this.container.bg.addChild(pole0_left);
         let pole0_right = new PIXI.Sprite(bgtex['pole0']);
         pole0_right.x = this.app.screen.width - BLOCK_WIDTH;
         pole0_right.y = this.field.dimension.hiddenRows * BLOCK_WIDTH;
-        this.app.stage.addChild(pole0_right);
+        this.container.bg.addChild(pole0_right);
         let block = new PIXI.extras.TilingSprite(
             bgtex['block'],
             this.field.dimension.columns * BLOCK_WIDTH,
@@ -188,7 +229,7 @@
         );
         block.x = BLOCK_WIDTH;
         block.y = this.app.screen.height - BLOCK_WIDTH;
-        this.app.stage.addChild(block);
+        this.container.bg.addChild(block);
       },
       loadpuyo(init = true){
         // set puyo
@@ -227,7 +268,7 @@
         }
         thisPuyo.x = (col + 1) * BLOCK_WIDTH;
         thisPuyo.y = (this.field.dimension.rows - row - 1) * BLOCK_WIDTH;
-        this.app.stage.addChild(thisPuyo);
+        this.container.puyo.addChild(thisPuyo);
       }
     },
     created(){
@@ -240,6 +281,11 @@
         transparent: false,
         resolution: 1
       });
+      this.container.bg = new PIXI.Container();
+      this.container.puyo = new PIXI.Container();
+      // make 2 groups for background and puyo
+      this.app.stage.addChild(this.container.bg);
+      this.app.stage.addChild(this.container.puyo);
       PIXI.loader
       .add('pic/bg.json')
       .add('pic/skin.json')
