@@ -26,7 +26,7 @@
 </template>
 
 <script>
-  import PuyoSim from './PuyoSimulatorpixi.vue'
+  import PuyoSim from './PuyoSimulatorpixi.vue';
   import Field from './simulator/Field/Field.js';
   import BitStreamReader from './simulator/Tools/BitStreamReader.js';
 
@@ -49,18 +49,18 @@
       Field.Object.NUISANCE = new Field.Object.Properties({ symbol: 'o', adjacentCleared: () => Field.Object.EMPTY });
       Field.Object.HARD_NUISANCE = new Field.Object.Properties({ symbol: 'O', adjacentCleared: () => Field.Object.NUISANCE });
 
-      let keys = ['RED', 'YELLOW', 'BLUE','GREEN','PURPLE',
+      let keys = ['RED', 'YELLOW', 'BLUE', 'GREEN', 'PURPLE',
                   'EMPTY'];
-      let gtr = [0,3,3,1,1,3,5,5,5,5,5,5,5,
-                 0,3,0,1,0,1,5,5,5,5,5,5,5,
-                 2,0,2,0,0,3,0,5,5,5,5,5,5,
-                 3,2,1,2,3,1,3,5,5,5,5,5,5,
-                 3,2,3,1,2,1,3,5,5,5,5,5,5,
-                 1,3,1,2,2,1,5,1,5,5,5,5,5];
+      let gtr = [0, 3, 3, 1, 1, 3, 5, 5, 5, 5, 5, 5, 5,
+                 0, 3, 0, 1, 0, 1, 5, 5, 5, 5, 5, 5, 5,
+                 2, 0, 2, 0, 0, 3, 0, 5, 5, 5, 5, 5, 5,
+                 3, 2, 1, 2, 3, 1, 3, 5, 5, 5, 5, 5, 5,
+                 3, 2, 3, 1, 2, 1, 3, 5, 5, 5, 5, 5, 5,
+                 1, 3, 1, 2, 2, 1, 5, 1, 5, 5, 5, 5, 5];
       // GTR on the field
       let iter = 0;
       for (let pos of field){
-        pos.object = Field.Object[keys[gtr[iter]]]
+        pos.object = Field.Object[keys[gtr[iter]]];
         iter++;
       }
 
@@ -81,7 +81,7 @@
       // find RED connections >= 4 in gravitated field
       let connections = Field.Algorithm.findConnections(cleared, {
           // only ALL COLORS connections
-          targetObjects: [Field.Object.RED,Field.Object.BLUE,Field.Object.GREEN,Field.Object.YELLOW,Field.Object.PURPLE],
+          targetObjects: [Field.Object.RED, Field.Object.BLUE, Field.Object.GREEN, Field.Object.YELLOW, Field.Object.PURPLE],
           // find connections >= 4
           minConnection: 4
       });
@@ -109,6 +109,6 @@
 
 <style>
 #simulator{
-  display:flex;
+  display: flex;
 }
 </style>
