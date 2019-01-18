@@ -16,6 +16,7 @@
       }
     ],
     "key-spacing": ["error", { "afterColon": true }],
+    "keyword-spacing": ["error"],
     "quotes": ["error", "single", { "avoidEscape": true }],
     "quote-props": ["error", "as-needed"],
     "semi": ["error", "always"],
