@@ -65,7 +65,7 @@
             timeline.play();
             timeline.eventCallback('onComplete', () => {
               if (state === 'gravity') {
-                this.setpuyo(diff.otherPositional.object, diff.otherPositional.row, diff.otherPositional.column, diff.otherPositional.connections);
+                this.setpuyo(diff.otherPositional, diff.otherPositional.connections);
               }
               resolve();
             });
@@ -111,7 +111,7 @@
         for (let diff of gravitationalDiff){
           // create drop animation timeline
           let tl = new TimelineMax({ paused: true });
-          this.setpuyo(diff.positional.object, diff.positional.row, diff.positional.column, 0);
+          this.setpuyo(diff.positional, 0);
           tl.to(
             this.pixifield[diff.positional.row][diff.positional.column],
             RECOVER_FRAME[diff.positional.row - diff.otherPositional.row] / 60,
@@ -238,16 +238,16 @@
             // new Sprite object
             this.pixifield[pos.row][pos.column] = new PIXI.Sprite();
           }
-          this.setpuyo(pos.object, pos.row, pos.column, pos.connections);
+          this.setpuyo(pos, pos.connections);
         }
       },
-      setpuyo(obj, row, col, connections){
+      setpuyo(pos, connections){
         let skintex = PIXI.loader.resources['pic/skin.json'].textures;
-        let thisPuyo = this.pixifield[row][col];
+        let thisPuyo = this.pixifield[pos.row][pos.column];
         if (!thisPuyo) {
           return;
         }
-        switch (obj) {
+        switch (pos.object) {
           case Field.Object.RED:
             thisPuyo.texture = skintex[`red${connections}`];
             break;
@@ -266,8 +266,8 @@
           default:
             break;
         }
-        thisPuyo.x = (col + 1) * BLOCK_WIDTH;
-        thisPuyo.y = (this.field.dimension.rows - row - 1) * BLOCK_WIDTH;
+        thisPuyo.x = (pos.column + 1) * BLOCK_WIDTH;
+        thisPuyo.y = (this.field.dimension.rows - pos.row - 1) * BLOCK_WIDTH;
         this.container.puyo.addChild(thisPuyo);
       }
     },
