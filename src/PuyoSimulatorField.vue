@@ -32,21 +32,22 @@
       state(newState, oldState){
         switch (newState) {
           case STATE_PLAY:
-              if ( oldState === STATE_IDLE) {
+              if (oldState === STATE_IDLE) {
                 this.play();
               } else {
                 this.$emit('update:state', STATE_IDLE);
               }
             break;
           case STATE_STEP:
-              if ( oldState === STATE_IDLE) {
+              if (oldState === STATE_IDLE) {
                 this.step();
               } else {
                 this.$emit('update:state', STATE_IDLE);
               }
             break;
           case STATE_RESET:
-              if ( oldState === STATE_IDLE) {
+              if ((oldState === STATE_IDLE) ||
+                  (oldState === STATE_END)) {
                 this.reset();
               } else {
                 this.$emit('update:state', STATE_IDLE);
