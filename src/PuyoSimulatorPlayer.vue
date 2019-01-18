@@ -26,7 +26,7 @@
     components: {
       PuyoField,
     },
-    props:{
+    props: {
       base64: String,
     },
     data() {
@@ -35,21 +35,21 @@
       };
     },
     computed: {
-      playing(){
+      playing() {
         return this.state === STATE_PLAY;
       }
     },
     methods: {
-      play(){
+      play() {
         this.state = STATE_PLAY;
       },
-      stop(){
+      stop() {
         this.state = STATE_IDLE;
       },
-      step(){
+      step() {
         this.state = STATE_STEP;
       },
-      reset(){
+      reset() {
         this.state = STATE_RESET;
       }
     }
@@ -57,12 +57,12 @@
 </script>
 
 <style lang="scss" scoped>
-.player{
+.player {
   background-color: #24292E;
-  &__control{
+  &__control {
     display: flex;
     justify-content: center;
-    li{
+    li {
       width: 25%;
       background-color: #151515;
       color: #ddd;
@@ -72,7 +72,7 @@
       text-align: center;
       cursor: pointer;
       margin: 0 2px;
-      &:hover{
+      &:hover {
         background-color: #252525;
       }
     }

@@ -20,7 +20,7 @@
     components: {
       PuyoPlayer,
     },
-    props:{
+    props: {
       base64: String,
     },
     data() {
@@ -36,37 +36,44 @@
 </script>
 
 <style lang="scss" scoped>
-.editor{
+$skin-block-size: 32px;
+$skin-puyo-size: $skin-block-size * 2;
+
+@mixin set-skin($x,$y) {
+  background: url(/pic/skin.png) #{$skin-puyo-size * $x} #{$y * $skin-block-size};
+}
+
+.editor {
   display: flex;
   background-color: #24292E;
-  &__color{
+  &__color {
     display: flex;
-    li{
-      width: 64px;
-      padding-bottom: 64px;
+    li {
+      width: $skin-puyo-size;
+      padding-bottom: $skin-puyo-size;
       margin: 5px;
       border-radius: 5px;
       border: #ddd solid 1px;
       background-color: #333;
       cursor: pointer;
-      &:hover{
+      &:hover {
         background-color: #555;
       }
     }
-    &--red{
-      background: url(/pic/skin.png) 0px -160px;
+    &--red {
+      @include set-skin(0,-5);
     }
-    &--green{
-      background: url(/pic/skin.png) -64px -160px;
+    &--green {
+      @include set-skin(-1,-5);
     }
-    &--blue{
-      background: url(/pic/skin.png) -128px -160px;
+    &--blue {
+      @include set-skin(-2,-5);
     }
-    &--yellow{
-      background: url(/pic/skin.png) -192px -160px;
+    &--yellow {
+      @include set-skin(-3,-5);
     }
-    &--purple{
-      background: url(/pic/skin.png) -256px -160px;
+    &--purple {
+      @include set-skin(-4,-5);
     }
   }
 }

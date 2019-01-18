@@ -59,7 +59,7 @@
                  1, 3, 1, 2, 2, 1, 5, 1, 5, 5, 5, 5, 5];
       // GTR on the field
       let iter = 0;
-      for (let pos of field){
+      for (let pos of field) {
         pos.object = Field.Object[keys[gtr[iter]]];
         iter++;
       }
@@ -108,9 +108,9 @@
 </script>
 
 <style>
-ul{
+ul {
   list-style: none;
-  padding-inline-start: 0;
+  padding: 0;
   margin: 0 0;
 }
 </style>

@@ -15,10 +15,11 @@
         "varsIgnorePattern": "^_"
       }
     ],
-    "keyword-spacing": ["error"],
+    "key-spacing": ["error", { "afterColon": true }],
     "quotes": ["error", "single", { "avoidEscape": true }],
     "quote-props": ["error", "as-needed"],
     "semi": ["error", "always"],
+    "space-before-blocks": "error",
     "space-infix-ops": "error",
     "object-curly-spacing": ["error", "always"],
     "space-unary-ops": ["error", { "words": true, "nonwords": false }],

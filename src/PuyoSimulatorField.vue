@@ -8,7 +8,7 @@
   import PixiPlugin from 'gsap/PixiPlugin'; // eslint-disable-line no-unused-vars
   import Field from './simulator/Field/Field.js';
   import BitStreamReader from './simulator/Tools/BitStreamReader.js';
-  import { BLOCK_WIDTH, RECOVER_FRAME, STATE_IDLE, STATE_PLAY, STATE_STEP, STATE_RESET, STATE_END } from './simulator/Constant';
+  import { BLOCK_WIDTH, RECOVERY_FRAME, STATE_IDLE, STATE_PLAY, STATE_STEP, STATE_RESET, STATE_END } from './simulator/Constant';
 
   export default {
     name: 'PuyoField',
@@ -24,12 +24,12 @@
         playable: true,
       };
     },
-    props:{
+    props: {
       base64: String,
       state: String,
     },
     watch: {
-      state(newState, oldState){
+      state(newState, oldState) {
         switch (newState) {
           case STATE_PLAY:
               if (oldState === STATE_IDLE) {
@@ -72,18 +72,18 @@
             });
         });
       },
-      async step(){
+      async step() {
         if (this.state === STATE_END) {
           return;
         }
         let condition = await this.gravity() || await this.clear();
-        if (condition){
+        if (condition) {
           this.$emit('update:state', STATE_IDLE);
         } else {
           this.$emit('update:state', STATE_END);
         }
       },
-      async play(){
+      async play() {
         let condition = (this.state !== STATE_END);
         while (condition) {
           if (this.state === STATE_PLAY) {
@@ -94,7 +94,7 @@
         }
         this.$emit('update:state', STATE_END);
       },
-      reset(){
+      reset() {
         for (var i = this.container.puyo.children.length - 1; i >= 0; i--) {
           this.container.puyo.removeChild(this.container.puyo.children[i]);
         }
@@ -102,33 +102,33 @@
         this.loadpuyo();
         this.$emit('update:state', STATE_IDLE);
       },
-      async gravity(){
+      async gravity() {
         let tl_arr = [];
         // get diff
         let gravitationalDiff = Field.Algorithm.gravitationalDiff(this.field);
-        if (gravitationalDiff.length === 0){
+        if (gravitationalDiff.length === 0) {
           return false;
         }
-        for (let diff of gravitationalDiff){
+        for (let diff of gravitationalDiff) {
           // create drop animation timeline
           let tl = new TimelineMax({ paused: true });
-          this.setpuyo(diff.positional, 0);
+          this.setpuyo(diff.positional);
           tl.to(
             this.pixifield[diff.positional.row][diff.positional.column],
-            RECOVER_FRAME[diff.positional.row - diff.otherPositional.row] / 60,
-            { pixi:{ y:(this.field.dimension.rows - diff.otherPositional.row - 1) * BLOCK_WIDTH },
-             ease:'Linear' }
+            RECOVERY_FRAME[diff.positional.row - diff.otherPositional.row] / 60,
+            { pixi: { y: (this.field.dimension.rows - diff.otherPositional.row - 1) * BLOCK_WIDTH },
+             ease: 'Linear' }
           ).to(
             this.pixifield[diff.positional.row][diff.positional.column],
             0.1, 
             {
-              pixi:{ scaleY:0.8 },
+              pixi: { scaleY: 0.8 },
             }
           ).to(
             this.pixifield[diff.positional.row][diff.positional.column],
             0.1, 
             {
-              pixi:{ scaleY:1 },
+              pixi: { scaleY: 1 },
               yoyo: true
             }
           );
@@ -146,7 +146,7 @@
         });
         return true;
       },
-      async clear(){
+      async clear() {
         let tl_arr = [];
         // set connections
         let connections = Field.Algorithm.findConnections(this.field, {
@@ -164,7 +164,7 @@
           tl.to(
             this.pixifield[diff.positional.row][diff.positional.column],
             0.1, 
-            { pixi:{ alpha:0.5 }, repeat:5, yoyo:true, onComplete:()=>{
+            { pixi: { alpha: 0.5 }, repeat: 5, yoyo: true, onComplete: ()=>{
               // remove sprite when clear animation complete
               this.container.puyo.removeChild(this.pixifield[diff.positional.row][diff.positional.column]);
               this.pixifield[diff.positional.row][diff.positional.column] = null;
@@ -180,7 +180,7 @@
         await Promise.all(clear_animation);
         return true;
       },
-      loadbg(){
+      loadbg() {
         let bgtex = PIXI.loader.resources['pic/bg.json'].textures;
         // set background
         let bg = new PIXI.extras.TilingSprite(
@@ -232,9 +232,9 @@
         block.y = this.app.screen.height - BLOCK_WIDTH;
         this.container.bg.addChild(block);
       },
-      loadpuyo(init = true){
+      loadpuyo(init = true) {
         // set puyo
-        for (let pos of this.field){
+        for (let pos of this.field) {
           if (init && pos.object !== Field.Object.EMPTY) {
             // new Sprite object
             this.pixifield[pos.row][pos.column] = new PIXI.Sprite();
@@ -242,7 +242,7 @@
           this.setpuyo(pos, pos.connections);
         }
       },
-      setpuyo(pos, connections){
+      setpuyo(pos, connections = 0) {
         let skintex = PIXI.loader.resources['pic/skin.json'].textures;
         let thisPuyo = this.pixifield[pos.row][pos.column];
         if (!thisPuyo) {
@@ -272,7 +272,7 @@
         this.container.puyo.addChild(thisPuyo);
       }
     },
-    created(){
+    created() {
       this.field = Field.Deserializer.fromBitStream(new BitStreamReader(this.base64));
       this.pixifield = new Array(this.field.dimension.rows).fill(null).map(() => new Array(this.field.dimension.columns).fill(null));
       this.app = new PIXI.Application({
@@ -296,7 +296,7 @@
     mounted() {
       document.getElementById('puyostage').appendChild(this.app.view);
     },
-    destroyed(){
+    destroyed() {
       this.app.destroy();
     }
   };
