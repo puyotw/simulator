@@ -60,7 +60,8 @@
 .player{
   background-color: #24292E;
   &__control{
-  display: flex;
+    display: flex;
+    justify-content: center;
     li{
       width: 25%;
       background-color: #151515;

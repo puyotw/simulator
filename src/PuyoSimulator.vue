@@ -110,6 +110,7 @@
 <style>
 ul{
   list-style: none;
-  margin: 0;
+  padding-inline-start: 0;
+  margin: 0 0;
 }
 </style>
