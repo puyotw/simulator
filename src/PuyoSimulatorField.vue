@@ -11,7 +11,7 @@
   import { BLOCK_WIDTH, RECOVER_FRAME, STATE_IDLE, STATE_PLAY, STATE_STEP, STATE_RESET, STATE_END } from './simulator/Constant';
 
   export default {
-    name: 'PuyoSim',
+    name: 'PuyoField',
     data() {
       return {
         app: null,

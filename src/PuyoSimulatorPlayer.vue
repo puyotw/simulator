@@ -1,7 +1,7 @@
 <template>
   <div class="player">
     <PuyoField :base64="base64" :state.sync="state"/>
-    <ul class="control">
+    <ul class="player__control">
       <li v-if="!playing" v-on:click.stop="play">
         <i class="fas fa-play"></i>
       </li>
@@ -56,34 +56,24 @@
   };
 </script>
 
-<style lang="scss">
-#simulator{
-  display: flex;
-}
-
-ul{
-  list-style: none;
-  margin: 0;
-}
-
+<style lang="scss" scoped>
 .player{
   background-color: #24292E;
-}
-
-.control{
+  &__control{
   display: flex;
-  li{
-    width: 25%;
-    background-color: #151515;
-    color: #ddd;
-    padding: 3px 0px;
-    border-radius: 2px;
-    border: #ddd solid 1px;
-    text-align: center;
-    cursor: pointer;
-    margin: 0 2px;
-    &:hover{
-      background-color: #252525;
+    li{
+      width: 25%;
+      background-color: #151515;
+      color: #ddd;
+      padding: 3px 0px;
+      border-radius: 2px;
+      border: #ddd solid 1px;
+      text-align: center;
+      cursor: pointer;
+      margin: 0 2px;
+      &:hover{
+        background-color: #252525;
+      }
     }
   }
 }

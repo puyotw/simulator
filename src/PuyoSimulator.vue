@@ -1,6 +1,6 @@
 <template>
   <div id="simulator">
-    <PuyoPlayer :base64="base64"/>
+    <PuyoEditor :base64="base64"/>
     <pre>
       original field:
       {{ field }}
@@ -26,13 +26,13 @@
 </template>
 
 <script>
-  import PuyoPlayer from './PuyoSimulatorPlayer.vue';
+  import PuyoEditor from './PuyoSimulatorEditor.vue';
   import Field from './simulator/Field/Field.js';
   import BitStreamReader from './simulator/Tools/BitStreamReader.js';
 
   export default {
     components: {
-      PuyoPlayer,
+      PuyoEditor,
     },
     data() {
       let field = new Field;
@@ -108,7 +108,8 @@
 </script>
 
 <style>
-#simulator{
-  display: flex;
+ul{
+  list-style: none;
+  margin: 0;
 }
 </style>
