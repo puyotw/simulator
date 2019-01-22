@@ -29,7 +29,7 @@ class PrefixTreeNode {
    *        Supersedes entry if provided. This node will be a branch node with 
    *        left and right assigned to the given nodes.
    */
-  constructor({ entry:[symbol, frequency] = [], branches:[left, right] = [] }) {
+  constructor({ entry: [symbol, frequency] = [], branches: [left, right] = [] }) {
     if (!left || !right) {
       this.symbol = symbol;
       this.frequency = frequency;
@@ -56,10 +56,10 @@ class PrefixTreeNode {
    */
   static from(istream) {
     if (istream.read(1) === this.BRANCH) {
-      return new this({ branches:[this.from(istream), this.from(istream)] });
+      return new this({ branches: [this.from(istream), this.from(istream)] });
     } else {
       // when reconstructing the tree from istream, frequency doesn't matter anymore
-      return new this({ entry:[String.fromCharCode(istream.read(8)), 0] });
+      return new this({ entry: [String.fromCharCode(istream.read(8)), 0] });
     }
   }
 
@@ -105,10 +105,10 @@ export default class PrefixTree {
    *        An object mapping from the symbol character to its frequencies.
    */ 
   constructor(frequencies) {
-    let queue = new TinyQueue(Object.entries(frequencies).map(entry => new PrefixTreeNode({ entry:entry })), 
+    let queue = new TinyQueue(Object.entries(frequencies).map(entry => new PrefixTreeNode({ entry: entry })), 
                               PrefixTreeNode.comparator);
     while (queue.length > 1) {
-      queue.push(new PrefixTreeNode({ branches:[queue.pop(), queue.pop()] }));
+      queue.push(new PrefixTreeNode({ branches: [queue.pop(), queue.pop()] }));
     }
 
     this.#root = queue.pop();

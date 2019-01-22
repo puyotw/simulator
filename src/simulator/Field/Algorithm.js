@@ -12,7 +12,7 @@ export default class Algorithm {
    *                                    returned result.
    * @param {Boolean} onlyVisible = true - if true, does not return any hidden positional.
    *
-   * @return {Map(Field.Object => [ [this.Positional, ... ], ... ])} 
+   * @return {Map(Field.Object => [ [ Field.Positional... ]... ], ...)} 
    *         A Map from a Field.Object to an Array of subarrays, each of which contains
    *         positions that are connected. No one position can appear in two different
    *         subarrays.
@@ -69,6 +69,20 @@ export default class Algorithm {
   }
   
   /**
+   * A convenience flatten function to flatten the connections map returned by
+   * Field.Algorithm.findConnections, such that the array elements are Field.
+   * Positional objects that can be the argument to Field.Algorithm.clearingDiff.
+   *
+   * @param {Map(Field.Object => [ [ Field.Positional... ]... ], ...)} map -
+   *        A connection map returned from Field.Algorithm.findConnections.
+   * @return {Array(Positional, ...)}
+   */
+  static flattenConnectionMap(map) {
+    let flatten = arrs => arrs.reduce((acc, arr) => acc.concat(arr), []);
+    
+    return flatten(flatten(Array.from(map.values())));
+  }
+  /**
    * Computes the diffs such that, if applied, the given positionals are
    * cleared from the field. 
    *
@@ -105,9 +119,9 @@ export default class Algorithm {
       if (intermediateObject === newObject) return;
 
       diffs.set(pos.primitive, new Diff({
-        type       : Diff.Type.TRANSFORM,
-        positional : pos,
-        argument   : newObject
+        type: Diff.Type.TRANSFORM,
+        positional: pos,
+        argument: newObject
       }));
     };
 
@@ -149,9 +163,9 @@ export default class Algorithm {
       for (; pos1.valid; [pos1, pos2] = [pos1.above, pos2.above]) {
         if (pos1.object !== pos2.object) {
           result.push(new Diff({
-            type       : Diff.Type.TRANSFORM,
-            positional : pos1,
-            argument   : pos2.object
+            type: Diff.Type.TRANSFORM,
+            positional: pos1,
+            argument: pos2.object
           }));
         }
       }
@@ -200,9 +214,9 @@ export default class Algorithm {
         if (p1Obj !== p2Obj) {
           // objects in p1 and p2 are different and need to exchange,
           result.push(new Diff({
-            type       : Diff.Type.EXCHANGE,
-            positional : p1,
-            argument   : p2
+            type: Diff.Type.EXCHANGE,
+            positional: p1,
+            argument: p2
           }));
 
           // log this change in auxilliary map

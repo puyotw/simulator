@@ -22,7 +22,7 @@ export default class Diff {
      * The exchanging positionals can be accessed through this.positional and
      * this.otherPositional.
      */
-    EXCHANGE : {}, 
+    EXCHANGE: {}, 
     /**
      * Indicates the object in a Positional is transforming to another kind of
      * object. $argument passed to the constructor is a value in Field.Object
@@ -30,7 +30,7 @@ export default class Diff {
      *
      * The $argument can later be accessed through this.newObject.
      */
-    TRANSFORM : {},
+    TRANSFORM: {},
   }
 
   constructor({ type, positional, argument }) {
