@@ -8,16 +8,16 @@ class NuisanceRateGenerator {
     this.#initialRate = initialRate;
   }
 
-  #update = rate => Math.trunc(rate / 2);
+  #update = rate => Math.floor(rate / 2);
 
   /**
    * The nuisance rate alternates between two pools. The first pool's initial
    * value is the initial nuisance rate, while the second pool's initial value
-   * is the 3 quarters of the initial nuisance rate. Before margin time begins,
-   * the rate is the current value in pool 1. Afterwards, the nuisance rate
-   * switches pools and is halved every update, until the rate reaches its
-   * minimum of 1, or a total of 14 times nuisance rate has changed, whichever
-   * is sooner.
+   * is 3 quarters of the initial nuisance rate. Before margin time begins, the
+   * rate is the current value in pool 1. Afterwards, the nuisance rate
+   * switches pools and is halved and truncated every update, until the rate
+   * reaches its minimum of 1, or a total of 14 times nuisance rate has changed,
+   * whichever is sooner.
    */
   *[Symbol.iterator]() {
     // the factors of initial values of nuisance rates in the respective pools
@@ -72,7 +72,7 @@ export default class Rule {
    * @param {Number} point - points to convert to nuisance count from.
    * @param {Number} time - seconds that the game has passed. Used to factor in
    *                        margin time.
-   * @return {[Number, Number]} A array of two Numbers, where the first Number
+   * @return {[Number, Number]} An array of two Numbers, where the first Number
    *                            is the nuisance count, and the second Number is
    *                            the remainder of point divided by nuisance rate.
    */

@@ -13,7 +13,7 @@ const ConnectionBitField = {
   BELOW: 1 << 0,
   ABOVE: 1 << 1,
   RIGHT: 1 << 2,
-  LEFT: 1 << 3,
+  LEFT:  1 << 3,
 };
 
 export default class Field {
@@ -63,9 +63,9 @@ export default class Field {
               } = {}) {
     // TODO: allow changing these values?
     this.dimension = {
-      columns: columns     >= 0 ? columns     :  6,
+      columns:     columns     >= 0 ? columns     :  6,
       visibleRows: visibleRows >= 0 ? visibleRows : 12,
-      hiddenRows: hiddenRows  >= 0 ? hiddenRows  :  1,
+      hiddenRows:  hiddenRows  >= 0 ? hiddenRows  :  1,
       get rows() { return this.visibleRows + this.hiddenRows; },
     };
 
