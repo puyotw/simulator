@@ -2,7 +2,7 @@ const FieldObject = {};
 export default FieldObject;
 
 Object.defineProperty(FieldObject, 'Properties', {
-  value : class {
+  value: class {
     constructor({
       /**
        * Function that, given positional, determines what this object should 
@@ -40,6 +40,6 @@ Object.defineProperty(FieldObject, 'Properties', {
 
 // Special EMPTY object, must exist.
 Object.defineProperty(FieldObject, 'EMPTY', {
-  value : new FieldObject.Properties({ gravityImmune : true, symbol : ' ' }),
-  enumerable : true,
+  value: new FieldObject.Properties({ gravityImmune: true, symbol: ' ' }),
+  enumerable: true,
 });

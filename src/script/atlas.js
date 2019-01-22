@@ -5,14 +5,14 @@ let data = {
     meta: {
         image: 'skin.png',
     },
-    frames:{}
+    frames: {}
 };
 let puyoname = ['red', 'green', 'blue', 'yellow', 'purple'];
 let puyowidth = 32;
 
 
-for (let i = 0; i < puyoname.length; i++){
-    for (let j = 0; j < 16; j++){
+for (let i = 0; i < puyoname.length; i++) {
+    for (let j = 0; j < 16; j++) {
         data.frames[puyoname[i] + j] = {
             frame: {
                 x: j * puyowidth,
@@ -33,8 +33,8 @@ for (let i = 0; i < puyoname.length; i++){
                 h: puyowidth,
             },
             pivot: {
-                x:0.5,
-                y:0.5,
+                x: 0.5,
+                y: 0.5,
             }
         };
     }

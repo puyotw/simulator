@@ -2,52 +2,34 @@
   <div id="simulator">
     <PuyoEditor :base64="base64"/>
     <pre>
-      original field:
-      {{ field }}
+original field:
+{{ field }}
 
-      base64: {{ base64 }}
+final field:
+{{ final }}
 
-      decoded field from base64:
-      {{ decoded }}
+points:
+{{ points }}
 
-      gravitated field:
-      {{ gravitated }}
-
-      cleared field:
-      {{ cleared }}
-
-      connections in gravitated original field:
-      {{ connections }}
-
-      gravitational diff:
-      {{ gravDiff }}
+with initial rate = 990, nuisance multiplier after 500 sec:
+{{ multiplier }}
     </pre>
   </div>
 </template>
 
 <script>
   import PuyoEditor from './PuyoSimulatorEditor.vue';
+  import Tsu from './simulator/Game/Tsu.js';
   import Field from './simulator/Field/Field.js';
-  import BitStreamReader from './simulator/Tools/BitStreamReader.js';
 
   export default {
     components: {
       PuyoEditor,
     },
     data() {
-      let field = new Field;
-
-      Field.Object.RED = new Field.Object.Properties({ symbol: 'R', cleared: () => Field.Object.EMPTY });
-      Field.Object.YELLOW = new Field.Object.Properties({ symbol: 'Y', cleared: () => Field.Object.EMPTY });
-      Field.Object.BLUE = new Field.Object.Properties({ symbol: 'B', cleared: () => Field.Object.EMPTY });
-      Field.Object.GREEN = new Field.Object.Properties({ symbol: 'G', cleared: () => Field.Object.EMPTY });
-      Field.Object.PURPLE = new Field.Object.Properties({ symbol: 'P', cleared: () => Field.Object.EMPTY });
-
-      Field.Object.BLOCK = new Field.Object.Properties({ symbol: '=', gravityImmune: true });
-      Field.Object.IRON = new Field.Object.Properties({ symbol: '-' });
-
-      Field.Object.NUISANCE = new Field.Object.Properties({ symbol: 'o', adjacentCleared: () => Field.Object.EMPTY });
-      Field.Object.HARD_NUISANCE = new Field.Object.Properties({ symbol: 'O', adjacentCleared: () => Field.Object.NUISANCE });
+      let game = new Tsu;
+      game.rule.initialNuisanceRate = 990;
+      let field = game.field;
 
       let keys = ['RED', 'YELLOW', 'BLUE', 'GREEN', 'PURPLE',
                   'EMPTY'];
@@ -64,44 +46,34 @@
         iter++;
       }
 
-      // find base64 encoding
-      let base64 = Field.Serializer.toBitStream(field).finalize();
-      
-      // try to decode from base64, see if they match?
-      let decoded = Field.Deserializer.fromBitStream(new BitStreamReader(base64));
+      let initial = field.clone();
 
-      // applies gravity to original field
-      let gravitated = field.clone();
-      let gravitationalDiff = Field.Algorithm.gravitationalDiff(gravitated);
-      gravitationalDiff.apply();
+      let points = 0;
 
-      // prepares a new field to execute clearance on
-      let cleared = gravitated.clone();
-
-      // find RED connections >= 4 in gravitated field
-      let connections = Field.Algorithm.findConnections(cleared, {
-          // only ALL COLORS connections
-          targetObjects: [Field.Object.RED, Field.Object.BLUE, Field.Object.GREEN, Field.Object.YELLOW, Field.Object.PURPLE],
-          // find connections >= 4
-          minConnection: 4
-      });
-      
-      // a convenience flatten function to flatten connections map
-      let flatten = arrs => arrs.reduce((acc, arr) => acc.concat(arr), []);
-      let flattenedConnections = flatten(flatten(Array.from(connections.values())));
+      for (let chain = 1; diff === undefined || diff.length > 0; ++chain) {
         
-      // execute clearance
-      Field.Algorithm.clearingDiff(flattenedConnections)
-                     .forEach(diff => diff.apply());
+        field.gravitate().apply();
+
+        let connections = field.connections();
+        var diff = field.clear(connections);
+
+        let [base, bonus] = game.rule.points({
+            chain: chain,
+            connectionMap: connections,
+            transformDiffs: diff
+        });
+
+        points += base * bonus;
+
+        diff.apply();
+      }
 
       return {
-        field: Field.Serializer.toAsciiArt(field),
-        base64: base64,
-        decoded: Field.Serializer.toAsciiArt(decoded),
-        connections: connections,
-        gravitated: Field.Serializer.toAsciiArt(gravitated),
-        cleared: Field.Serializer.toAsciiArt(cleared),
-        gravDiff: gravitationalDiff,
+        field: Field.Serializer.toAsciiArt(initial),
+        base64: Field.Serializer.toBitStream(initial).finalize(),
+        final: Field.Serializer.toAsciiArt(field),
+        points: points,
+        multiplier: game.rule.nuisanceRateMultiplier({ time: 500 })
       };
     }
   };

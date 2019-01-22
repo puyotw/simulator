@@ -10,10 +10,10 @@ import Deserializer from './Deserializer.js';
  * detailed description.
  */
 const ConnectionBitField = {
-  BELOW : 1 << 0,
-  ABOVE : 1 << 1,
-  RIGHT : 1 << 2,
-  LEFT  : 1 << 3,
+  BELOW: 1 << 0,
+  ABOVE: 1 << 1,
+  RIGHT: 1 << 2,
+  LEFT: 1 << 3,
 };
 
 export default class Field {
@@ -63,9 +63,9 @@ export default class Field {
               } = {}) {
     // TODO: allow changing these values?
     this.dimension = {
-      columns     : columns     >= 0 ? columns     :  6,
-      visibleRows : visibleRows >= 0 ? visibleRows : 12,
-      hiddenRows  : hiddenRows  >= 0 ? hiddenRows  :  1,
+      columns: columns     >= 0 ? columns     :  6,
+      visibleRows: visibleRows >= 0 ? visibleRows : 12,
+      hiddenRows: hiddenRows  >= 0 ? hiddenRows  :  1,
       get rows() { return this.visibleRows + this.hiddenRows; },
     };
 
@@ -150,6 +150,10 @@ export default class Field {
       /**
        * Returns a connection bit field.
        *
+       * Note that if the adjacent object is hidden, then it is not considered
+       * connected to this object. Similarly, if this object is hidden, it is
+       * not considered to be connected to any object.
+       *
        * A connection bit field is a 4-bit Number that stores whether adjacent
        * slots contain the same object as this slot.
        *
@@ -160,10 +164,12 @@ export default class Field {
        * @return a connection bit field about this Positional.
        */
       get connections() {
-        return 0 | (this.below.object == this.object ? ConnectionBitField.BELOW : 0)
-                 | (this.above.object == this.object ? ConnectionBitField.ABOVE : 0)
-                 | (this.right.object == this.object ? ConnectionBitField.RIGHT : 0)
-                 | (this.left.object  == this.object ? ConnectionBitField.LEFT  : 0);
+        if (this.object.hidden) return 0;
+
+        return 0 | (!this.below.hidden && this.below.object == this.object ? ConnectionBitField.BELOW : 0)
+                 | (!this.above.hidden && this.above.object == this.object ? ConnectionBitField.ABOVE : 0)
+                 | (!this.right.hidden && this.right.object == this.object ? ConnectionBitField.RIGHT : 0)
+                 | (!this.left.hidden  && this.left.object  == this.object ? ConnectionBitField.LEFT  : 0);
       }
 
       /**
