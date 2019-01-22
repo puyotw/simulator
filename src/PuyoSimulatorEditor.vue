@@ -26,6 +26,9 @@
     data() {
       return {
         minConnections: 4,
+        fieldWidth: 6,
+        fieldHeight: 12,
+        fieldHidden: 1,
       };
     },
     computed: {

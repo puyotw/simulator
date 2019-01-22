@@ -98,6 +98,7 @@
         for (var i = this.container.puyo.children.length - 1; i >= 0; i--) {
           this.container.puyo.removeChild(this.container.puyo.children[i]);
         }
+        this.pixifield = new Array(this.field.dimension.rows).fill(null).map(() => new Array(this.field.dimension.columns).fill(null));
         this.field = Field.Deserializer.fromBitStream(new BitStreamReader(this.base64));
         this.loadpuyo();
         this.$emit('update:state', STATE_IDLE);
@@ -190,15 +191,15 @@
         );
         this.container.bg.addChild(bg);
         let bgleft = new PIXI.extras.TilingSprite(
-            bgtex['bgleft'],
-            48,
+            bgtex['bgdark'],
+            BLOCK_WIDTH * 1.5,
             this.app.screen.height
         );
         this.container.bg.addChild(bgleft);
         let bgtop = new PIXI.extras.TilingSprite(
-            bgtex['bgtop'],
+            bgtex['bgdark'],
             this.app.screen.width,
-            48
+            BLOCK_WIDTH * 1.5
         );
         this.container.bg.addChild(bgtop);
         let pole1_left = new PIXI.extras.TilingSprite(
@@ -242,6 +243,22 @@
           this.setpuyo(pos, pos.connections);
         }
       },
+      loadEditor() {
+        // let skintex = PIXI.loader.resources['pic/skin.json'].textures;
+        let bgtex = PIXI.loader.resources['pic/bg.json'].textures;
+        let cursor = new PIXI.Sprite(bgtex['select']);
+        this.container.editor.addChild(cursor);
+        this.container.editor.interactive = true;
+        this.container.editor.hitArea = new PIXI.Rectangle(BLOCK_WIDTH, 0, 
+          this.field.dimension.columns * BLOCK_WIDTH, 
+          this.field.dimension.rows * BLOCK_WIDTH);
+        this.container.editor.on('mousemove', (event) => { 
+            const x = event.data.global.x;
+            const y = event.data.global.y;
+            cursor.x = Math.floor(x / BLOCK_WIDTH) * BLOCK_WIDTH;
+            cursor.y = Math.floor(y / BLOCK_WIDTH) * BLOCK_WIDTH;
+        });
+      },
       setpuyo(pos, connections = 0) {
         let skintex = PIXI.loader.resources['pic/skin.json'].textures;
         let thisPuyo = this.pixifield[pos.row][pos.column];
@@ -284,14 +301,18 @@
       });
       this.container.bg = new PIXI.Container();
       this.container.puyo = new PIXI.Container();
+      this.container.editor = new PIXI.Container();
       // make 2 groups for background and puyo
       this.app.stage.addChild(this.container.bg);
       this.app.stage.addChild(this.container.puyo);
+      this.app.stage.addChild(this.container.editor);
+      this.app.renderer.plugins.interaction.moveWhenInside = true;
       PIXI.loader
       .add('pic/bg.json')
       .add('pic/skin.json')
       .load(this.loadbg)
-      .load(this.loadpuyo);
+      .load(this.loadpuyo)
+      .load(this.loadEditor);
     },
     mounted() {
       document.getElementById('puyostage').appendChild(this.app.view);
