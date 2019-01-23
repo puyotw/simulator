@@ -47,4 +47,18 @@ export default class BitStreamReader {
 
     return result | this.read(bitCount - 1);
   }
+
+  /**
+   * Reads a variable length quantity. Refer to BitStreamWriter for explanation
+   * of variable length quantities.
+   */
+  readVariableLength(partitionBitCount) {
+    let result = 0;
+    do {
+      var shouldContinue = this.read(1);
+      result <<= partitionBitCount;
+      result |= this.read(partitionBitCount);
+    } while (shouldContinue === 1);
+    return result;
+  }
 }

@@ -44,15 +44,15 @@ export default function(Field) {
 
   Deserializer.fromBitStream = function(istream) {
     // header:
-    //   uint8   - dimension.columns
-    //   uint8   - dimension.visibleRows
-    //   uint8   - dimension.hiddenRows
+    //   varlen5 - dimension.columns
+    //   varlen5 - dimension.visibleRows
+    //   varlen2 - dimension.hiddenRows
     //   custom  - encoding tree structure
 
     let field = new Field({
-      columns: istream.read(8),
-      visibleRows: istream.read(8),
-      hiddenRows: istream.read(8), 
+      columns:     istream.readVariableLength(5),
+      visibleRows: istream.readVariableLength(5),
+      hiddenRows:  istream.readVariableLength(2), 
     });
 
     let encodingTree = PrefixTree.from(istream);

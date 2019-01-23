@@ -35,14 +35,14 @@ export default function(Field) {
     let encodingTree = new PrefixTree(frequencies);
 
     // header:
-    //   uint8   - dimension.columns
-    //   uint8   - dimension.visibleRows
-    //   uint8   - dimension.hiddenRows
+    //   varlen5 (max 8) - dimension.columns
+    //   varlen5 (max 8) - dimension.visibleRows
+    //   varlen2 (max 8) - dimension.hiddenRows
     //   custom  - encoding tree structure
     
-    ostream.write({ value: field.dimension.columns, writeBitCount: 8 });
-    ostream.write({ value: field.dimension.visibleRows, writeBitCount: 8 });
-    ostream.write({ value: field.dimension.hiddenRows, writeBitCount: 8 });
+    ostream.writeVariableLength({ value: field.dimension.columns    , writeBitCount: 8, partitionBitCount: 5 });
+    ostream.writeVariableLength({ value: field.dimension.visibleRows, writeBitCount: 8, partitionBitCount: 5 });
+    ostream.writeVariableLength({ value: field.dimension.hiddenRows , writeBitCount: 8, partitionBitCount: 2 });
     encodingTree.to(ostream);
 
     // field data:

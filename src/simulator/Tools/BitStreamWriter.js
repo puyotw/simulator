@@ -42,6 +42,56 @@ export default class BitStreamWriter {
   }
 
   /**
+   * Writes data to this stream as a variable length quantity.
+   *
+   * A variable length quantity may require several partitions to fully
+   * store the value, each partition having partitionBitCount + 1 many bits. If
+   * the quantity requires more than one partition, the most significant bit of
+   * the partition is 1; 0 otherwise.
+   *
+   * For example, if value is 0b10001, and partitionBitCount is 5:
+   * Since 5 bits can fully store this binary number, the result is 0b 010001.
+   *
+   * For the same value, if partitionBitCount is 2:
+   * Since 2 bits can NOT fully store this binary number, it requires more than
+   * 1 partition; in fact, it requires 3 partitions, and will be stored as
+   * 0b 101 100 001.
+   *
+   * This is particularly useful if a value usually doesn't exceed only a few
+   * bits, in which case storing the value in a fixed length fashion may waste
+   * a lot of bits.
+   *
+   * @param {Number} value - the value to write as a varlen quantity.
+   * @param {Number} writeBitCount - the maximum number of bits in value to write.
+   * @param {Number} partitionBitCount - the number of bits each partition has.
+   */
+  writeVariableLength({ value, writeBitCount, partitionBitCount }) {
+    let self = this;
+    let writeNext = function(v, c) {
+      if (c <= partitionBitCount) {
+        return [v >>> partitionBitCount, 
+                () => {
+                  self.write({ value: 0, writeBitCount: 1 });
+                  self.write({ value: v, writeBitCount: partitionBitCount });
+                }];
+      } else {
+        let [newV, f] = writeNext(v, c - partitionBitCount);
+        return [newV >>> partitionBitCount, 
+                () => {
+                  if (newV !== 0) {
+                    self.write({ value: 1, writeBitCount: 1 });
+                    self.write({ value: newV, writeBitCount: partitionBitCount });
+                  }
+                  f();
+                }];
+      }
+    };
+
+    let [, w] = writeNext(value, writeBitCount);
+    w();
+  }
+
+  /**
    * Converts written stream to Base64 encoding. Finalizes this BitStreamWriter.
    * @return {String} Base64 encoded data written to this stream.
    */
