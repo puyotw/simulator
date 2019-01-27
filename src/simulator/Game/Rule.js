@@ -55,7 +55,7 @@ export default class Rule {
    * @param {Number} marginTime - time in seconds after which attack power
    *                              intensifies. The exact intensification rule
    *                              is defined by the game mode.
-   *                              May be undefined, in which case the margin time
+   *                              May be null, in which case the margin time
    *                              power intensification never applies.
    * @param {Number} minClearConnection - the minimum size of connection that
    *                                      triggers clearance.
@@ -96,6 +96,7 @@ export default class Rule {
    * @return {Number} the nuisance rate with margin time factored in.
    */
   nuisanceRate({ time = 0 }) {
+    if (this.marginTime === null) return this.initialNuisanceRate;
     // update of nuisance rate happens every 16 seconds
     const UPDATE_RATE = 16;
 
