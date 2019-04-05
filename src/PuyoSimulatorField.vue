@@ -6,8 +6,8 @@
   import * as PIXI from 'pixi.js';
   import { TimelineMax } from 'gsap/TweenMax';
   import PixiPlugin from 'gsap/PixiPlugin'; // eslint-disable-line no-unused-vars
+  import Game from './simulator/Game/Game.js';
   import Field from './simulator/Field/Field.js';
-  import BitStreamReader from './simulator/Tools/BitStreamReader.js';
   import { BLOCK_WIDTH, RECOVERY_FRAME, STATE_IDLE, STATE_PLAY, STATE_STEP, STATE_RESET, STATE_END } from './simulator/Constant';
 
   export default {
@@ -19,7 +19,7 @@
           bg: null,
           puyo: null,
         },
-        field: null,
+        game: null,
         pixifield: null,
         chain: 0,
       };
@@ -100,15 +100,14 @@
         for (var i = this.container.puyo.children.length - 1; i >= 0; i--) {
           this.container.puyo.removeChild(this.container.puyo.children[i]);
         }
-        this.pixifield = new Array(this.field.dimension.rows).fill(null).map(() => new Array(this.field.dimension.columns).fill(null));
-        this.field = Field.Deserializer.fromBitStream(new BitStreamReader(this.base64));
+        this.game = Game.Deserializer.fromBase64(this.base64);
         this.loadpuyo();
         this.$emit('update:state', STATE_IDLE);
       },
       async gravity() {
         let tl_arr = [];
         // get diff
-        let gravitationalDiff = Field.Algorithm.gravitationalDiff(this.field);
+        let gravitationalDiff = this.game.field.gravitate();
         if (gravitationalDiff.length === 0) {
           return false;
         }
@@ -119,7 +118,7 @@
           tl.to(
             this.pixifield[diff.positional.row][diff.positional.column],
             RECOVERY_FRAME[diff.positional.row - diff.otherPositional.row] / 60,
-            { pixi: { y: (this.field.dimension.rows - diff.otherPositional.row - 1) * BLOCK_WIDTH },
+            { pixi: { y: (this.game.field.dimension.rows - diff.otherPositional.row - 1) * BLOCK_WIDTH },
              ease: 'Linear' }
           ).to(
             this.pixifield[diff.positional.row][diff.positional.column],
@@ -152,16 +151,13 @@
       async clear() {
         let tl_arr = [];
         // set connections
-        let connections = Field.Algorithm.findConnections(this.field, {
-            targetObjects: [Field.Object.RED, Field.Object.BLUE, Field.Object.GREEN, Field.Object.YELLOW, Field.Object.PURPLE],
-            minConnection: 4
-        });
+        let connections = this.game.field.connections();
         let flatten = arrs => arrs.reduce((acc, arr) => acc.concat(arr), []);
         let flattenedConnections = flatten(flatten(Array.from(connections.values())));
         if (flattenedConnections.length === 0) {
           return false;
         }
-        Field.Algorithm.clearingDiff(flattenedConnections).forEach((diff, index) => {
+        this.game.field.clear().forEach(diff => {
           // create timeline
           let tl = new TimelineMax({ paused: true });
           tl.to(
@@ -211,7 +207,7 @@
             BLOCK_WIDTH,
             this.app.screen.height
         );
-        pole1_left.y = this.field.dimension.hiddenRows * BLOCK_WIDTH;
+        pole1_left.y = this.game.field.dimension.hiddenRows * BLOCK_WIDTH;
         this.container.bg.addChild(pole1_left);
         let pole1_right = new PIXI.extras.TilingSprite(
             bgtex['pole1'],
@@ -219,18 +215,18 @@
             this.app.screen.height
         );
         pole1_right.x = this.app.screen.width - BLOCK_WIDTH;
-        pole1_right.y = this.field.dimension.hiddenRows * BLOCK_WIDTH;
+        pole1_right.y = this.game.field.dimension.hiddenRows * BLOCK_WIDTH;
         this.container.bg.addChild(pole1_right);
         let pole0_left = new PIXI.Sprite(bgtex['pole0']);
-        pole0_left.y = this.field.dimension.hiddenRows * BLOCK_WIDTH;
+        pole0_left.y = this.game.field.dimension.hiddenRows * BLOCK_WIDTH;
         this.container.bg.addChild(pole0_left);
         let pole0_right = new PIXI.Sprite(bgtex['pole0']);
         pole0_right.x = this.app.screen.width - BLOCK_WIDTH;
-        pole0_right.y = this.field.dimension.hiddenRows * BLOCK_WIDTH;
+        pole0_right.y = this.game.field.dimension.hiddenRows * BLOCK_WIDTH;
         this.container.bg.addChild(pole0_right);
         let block = new PIXI.extras.TilingSprite(
             bgtex['block'],
-            this.field.dimension.columns * BLOCK_WIDTH,
+            this.game.field.dimension.columns * BLOCK_WIDTH,
             BLOCK_WIDTH
         );
         block.x = BLOCK_WIDTH;
@@ -239,7 +235,7 @@
       },
       loadpuyo(init = true) {
         // set puyo
-        for (let pos of this.field) {
+        for (let pos of this.game.field) {
           if (init && pos.object !== Field.Object.EMPTY) {
             // new Sprite object
             this.pixifield[pos.row][pos.column] = new PIXI.Sprite();
@@ -299,16 +295,16 @@
             break;
         }
         thisPuyo.x = (pos.column + 1) * BLOCK_WIDTH;
-        thisPuyo.y = (this.field.dimension.rows - pos.row - 1) * BLOCK_WIDTH;
+        thisPuyo.y = (this.game.field.dimension.rows - pos.row - 1) * BLOCK_WIDTH;
         this.container.puyo.addChild(thisPuyo);
       }
     },
     created() {
-      this.field = Field.Deserializer.fromBitStream(new BitStreamReader(this.base64));
-      this.pixifield = new Array(this.field.dimension.rows).fill(null).map(() => new Array(this.field.dimension.columns).fill(null));
+      this.game = Game.Deserializer.fromBase64(this.base64);
+      this.pixifield = new Array(this.game.field.dimension.rows).fill(null).map(() => new Array(this.game.field.dimension.columns).fill(null));
       this.app = new PIXI.Application({
-        width: (this.field.dimension.columns + 2) * BLOCK_WIDTH, // left & right pole (+2)
-        height: (this.field.dimension.rows + 1) * BLOCK_WIDTH,   // floor (+1)
+        width: (this.game.field.dimension.columns + 2) * BLOCK_WIDTH, // left & right pole (+2)
+        height: (this.game.field.dimension.rows + 1) * BLOCK_WIDTH,   // floor (+1)
         antialias: true,
         transparent: false,
         resolution: 1

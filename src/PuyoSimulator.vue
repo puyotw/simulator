@@ -5,13 +5,22 @@
 original field:
 {{ field }}
 
+base64 field:
+{{ base64 }}
+
+decoded field:
+{{ decoded }}
+
+decoded field margin time setting is no:
+{{ noMarginTime }}
+
 final field:
 {{ final }}
 
 points:
 {{ points }}
 
-with initial rate = 990, nuisance multiplier after 500 sec:
+with margin time = undefined, nuisance multiplier after 500 sec:
 {{ multiplier }}
     </pre>
   </div>
@@ -20,7 +29,9 @@ with initial rate = 990, nuisance multiplier after 500 sec:
 <script>
   import PuyoEditor from './PuyoSimulatorEditor.vue';
   import Tsu from './simulator/Game/Tsu.js';
+  import Game from './simulator/Game/Game.js';
   import Field from './simulator/Field/Field.js';
+  import BitStreamReader from './simulator/Tools/BitStreamReader.js';
 
   export default {
     components: {
@@ -28,7 +39,7 @@ with initial rate = 990, nuisance multiplier after 500 sec:
     },
     data() {
       let game = new Tsu;
-      game.rule.initialNuisanceRate = 990;
+      game.rule.marginTime = null;
       let field = game.field;
 
       let keys = ['RED', 'YELLOW', 'BLUE', 'GREEN', 'PURPLE',
@@ -46,6 +57,8 @@ with initial rate = 990, nuisance multiplier after 500 sec:
         iter++;
       }
 
+      let base64 = Game.Serializer.toBitStream(game).finalize();
+      let decoded = Game.Deserializer.fromBitStream(new BitStreamReader(base64));
       let initial = field.clone();
 
       let points = 0;
@@ -70,10 +83,12 @@ with initial rate = 990, nuisance multiplier after 500 sec:
 
       return {
         field: Field.Serializer.toAsciiArt(initial),
-        base64: Field.Serializer.toBitStream(initial).finalize(),
+        base64: base64,
+        decoded: Field.Serializer.toAsciiArt(decoded.field),
         final: Field.Serializer.toAsciiArt(field),
         points: points,
-        multiplier: game.rule.nuisanceRateMultiplier({ time: 500 })
+        multiplier: game.rule.nuisanceRateMultiplier({ time: 500 }),
+        noMarginTime: decoded.rule.marginTime === null
       };
     }
   };

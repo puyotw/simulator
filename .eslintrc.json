@@ -15,7 +15,7 @@
         "varsIgnorePattern": "^_"
       }
     ],
-    "key-spacing": ["error", { "afterColon": true }],
+    "key-spacing": ["error", { "afterColon": true, "mode": "minimum" }],
     "keyword-spacing": ["error"],
     "quotes": ["error", "single", { "avoidEscape": true }],
     "quote-props": ["error", "as-needed"],

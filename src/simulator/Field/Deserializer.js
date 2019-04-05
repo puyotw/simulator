@@ -42,18 +42,9 @@ export default function(Field) {
     return field;
   };
 
-  Deserializer.fromBitStream = function(istream) {
+  Deserializer.fromBitStream = function(field, istream) {
     // header:
-    //   uint8   - dimension.columns
-    //   uint8   - dimension.visibleRows
-    //   uint8   - dimension.hiddenRows
-    //   custom  - encoding tree structure
-
-    let field = new Field({
-      columns: istream.read(8),
-      visibleRows: istream.read(8),
-      hiddenRows: istream.read(8), 
-    });
+    //   custom - encoding tree structure
 
     let encodingTree = PrefixTree.from(istream);
 
