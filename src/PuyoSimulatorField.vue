@@ -21,12 +21,14 @@
         },
         field: null,
         pixifield: null,
-        playable: true,
+        chain: 0,
       };
     },
     props: {
       base64: String,
       state: String,
+      editor: Boolean,
+      color: Number,
     },
     watch: {
       state(newState, oldState) {
@@ -159,16 +161,18 @@
         if (flattenedConnections.length === 0) {
           return false;
         }
-        Field.Algorithm.clearingDiff(flattenedConnections).forEach(diff => {
+        Field.Algorithm.clearingDiff(flattenedConnections).forEach((diff, index) => {
           // create timeline
           let tl = new TimelineMax({ paused: true });
           tl.to(
             this.pixifield[diff.positional.row][diff.positional.column],
             0.1, 
             { pixi: { alpha: 0.5 }, repeat: 5, yoyo: true, onComplete: ()=>{
-              // remove sprite when clear animation complete
-              this.container.puyo.removeChild(this.pixifield[diff.positional.row][diff.positional.column]);
-              this.pixifield[diff.positional.row][diff.positional.column] = null;
+                // remove sprite when clear animation complete
+                this.container.puyo.removeChild(this.pixifield[diff.positional.row][diff.positional.column]);
+                this.pixifield[diff.positional.row][diff.positional.column] = null;
+                // chain+1 / +score
+                this.chain += 1;
               }
             },
           );
@@ -252,11 +256,21 @@
         this.container.editor.hitArea = new PIXI.Rectangle(BLOCK_WIDTH, 0, 
           this.field.dimension.columns * BLOCK_WIDTH, 
           this.field.dimension.rows * BLOCK_WIDTH);
-        this.container.editor.on('mousemove', (event) => { 
+        this.container.editor.on('mousemove', (event) => {
+          const x = event.data.global.x;
+          const y = event.data.global.y;
+          cursor.x = Math.floor(x / BLOCK_WIDTH) * BLOCK_WIDTH;
+          cursor.y = Math.floor(y / BLOCK_WIDTH) * BLOCK_WIDTH;
+        });
+        this.container.editor.on('click', (event) => {
+            let pos = {
+              x: 0,
+              y: 0
+            };
             const x = event.data.global.x;
             const y = event.data.global.y;
-            cursor.x = Math.floor(x / BLOCK_WIDTH) * BLOCK_WIDTH;
-            cursor.y = Math.floor(y / BLOCK_WIDTH) * BLOCK_WIDTH;
+            pos.x = Math.floor(x / BLOCK_WIDTH) - 1;
+            pos.y = Math.floor(y / BLOCK_WIDTH);
         });
       },
       setpuyo(pos, connections = 0) {
@@ -301,18 +315,23 @@
       });
       this.container.bg = new PIXI.Container();
       this.container.puyo = new PIXI.Container();
-      this.container.editor = new PIXI.Container();
+      
       // make 2 groups for background and puyo
       this.app.stage.addChild(this.container.bg);
       this.app.stage.addChild(this.container.puyo);
-      this.app.stage.addChild(this.container.editor);
-      this.app.renderer.plugins.interaction.moveWhenInside = true;
+
       PIXI.loader
       .add('pic/bg.json')
       .add('pic/skin.json')
       .load(this.loadbg)
       .load(this.loadpuyo)
-      .load(this.loadEditor);
+
+      if (this.editor) {
+        this.container.editor = new PIXI.Container();
+        this.app.stage.addChild(this.container.editor);
+        this.app.renderer.plugins.interaction.moveWhenInside = true;
+        PIXI.loader.load(this.loadEditor);
+      }
     },
     mounted() {
       document.getElementById('puyostage').appendChild(this.app.view);

@@ -1,6 +1,6 @@
 <template>
   <div class="player">
-    <PuyoField :base64="base64" :state.sync="state"/>
+    <PuyoField :base64="base64" :state.sync="state" :editor="editor" :color="color"/>
     <ul class="player__control">
       <li v-if="!playing" v-on:click.stop="play">
         <i class="fas fa-play"></i>
@@ -28,6 +28,8 @@
     },
     props: {
       base64: String,
+      editor: Boolean,
+      color: Number,
     },
     data() {
       return {

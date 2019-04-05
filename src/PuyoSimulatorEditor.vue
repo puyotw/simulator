@@ -1,6 +1,6 @@
 <template>
   <div class="editor">
-    <PuyoPlayer :base64="base64"/>
+    <PuyoPlayer :base64="base64" :editor="true" :color="color"/>
     <div class="editor__control">
       <ul class="editor__color">
         <li class="editor__color--red"></li>
@@ -29,6 +29,7 @@
         fieldWidth: 6,
         fieldHeight: 12,
         fieldHidden: 1,
+        color: null ,
       };
     },
     computed: {
