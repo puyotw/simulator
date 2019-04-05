@@ -250,8 +250,8 @@
         this.container.editor.addChild(cursor);
         this.container.editor.interactive = true;
         this.container.editor.hitArea = new PIXI.Rectangle(BLOCK_WIDTH, 0, 
-          this.field.dimension.columns * BLOCK_WIDTH, 
-          this.field.dimension.rows * BLOCK_WIDTH);
+          this.game.field.dimension.columns * BLOCK_WIDTH, 
+          this.game.field.dimension.rows * BLOCK_WIDTH);
         this.container.editor.on('mousemove', (event) => {
           const x = event.data.global.x;
           const y = event.data.global.y;
@@ -320,7 +320,7 @@
       .add('pic/bg.json')
       .add('pic/skin.json')
       .load(this.loadbg)
-      .load(this.loadpuyo)
+      .load(this.loadpuyo);
 
       if (this.editor) {
         this.container.editor = new PIXI.Container();
