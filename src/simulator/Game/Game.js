@@ -3,11 +3,11 @@ import BitStreamWriter from '../Tools/BitStreamWriter.js';
 import BitStreamReader from '../Tools/BitStreamReader.js';
 
 // color puyo
-Field.Object.RED = new Field.Object.Properties({ symbol: 'R', cleared: () => Field.Object.EMPTY });
-Field.Object.YELLOW = new Field.Object.Properties({ symbol: 'Y', cleared: () => Field.Object.EMPTY });
-Field.Object.BLUE = new Field.Object.Properties({ symbol: 'B', cleared: () => Field.Object.EMPTY });
-Field.Object.GREEN = new Field.Object.Properties({ symbol: 'G', cleared: () => Field.Object.EMPTY });
-Field.Object.PURPLE = new Field.Object.Properties({ symbol: 'P', cleared: () => Field.Object.EMPTY });
+Field.Object.RED = new Field.Object.Properties({ symbol: 'R', cleared: (p) => p.hidden ? this : Field.Object.EMPTY });
+Field.Object.YELLOW = new Field.Object.Properties({ symbol: 'Y', cleared: (p) => p.hidden ? this : Field.Object.EMPTY });
+Field.Object.BLUE = new Field.Object.Properties({ symbol: 'B', cleared: (p) => p.hidden ? this : Field.Object.EMPTY });
+Field.Object.GREEN = new Field.Object.Properties({ symbol: 'G', cleared: (p) => p.hidden ? this : Field.Object.EMPTY });
+Field.Object.PURPLE = new Field.Object.Properties({ symbol: 'P', cleared: (p) => p.hidden ? this : Field.Object.EMPTY });
 
 // non-clearable puyo
 Field.Object.BLOCK = new Field.Object.Properties({ symbol: '=', gravityImmune: true });

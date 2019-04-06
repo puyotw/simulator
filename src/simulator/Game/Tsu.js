@@ -271,12 +271,13 @@ export default class Tsu extends Game {
     /**
      * Pass through to Field.Algorithm.clearingDiff.
      *
-     * @param {decltype(Field.Algorithm.findConnections)} connections = this.field.connections()
-     *        The connection map storing Positionals to clear. May be specified
-     *        if the connection map was previously calculated.
+     * @param {decltype(Field.Algorithm.flattenConnectionMap(this.field.connections()))} 
+     *        flattenedConnections = Field.Algorithm.flattenConnectionMap(this.field.connections())
+     *        The flattened connection map storing Positionals to clear. May be specified
+     *        if the flattened connection map was previously calculated.
      */
-    this.field.clear = function(connections = this.connections()) {
-      return Field.Algorithm.clearingDiff(Field.Algorithm.flattenConnectionMap(connections));
+    this.field.clear = function(flattenedConnections = Field.Algorithm.flattenConnectionMap(this.connections())) {
+      return Field.Algorithm.clearingDiff(flattenedConnections);
     };
 
     {

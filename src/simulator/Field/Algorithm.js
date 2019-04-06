@@ -51,13 +51,16 @@ export default class Algorithm {
           // mark position as visited
           toVisit.delete(position.primitive);
   
-          // this position contains the target field object,
-          // include it in the connected result
-          connected.push(position);
+          if (!onlyVisible || !position.hidden) {
+            // this position contains the target field object,
+            // and is not hidden or is hidden but user still wants it,
+            // include it in the connected result
+            connected.push(position);
+            // look in adjacent positions, include them in the connected array as well if 
+            // they contain the same field object
+            position.adjacent.forEach(dfs);
+          }
   
-          // look in adjacent positions, include them in the connected array as well if 
-          // they contain the same field object
-          position.adjacent.forEach(dfs);
         })(position);
   
         if (connected.length >= minConnection) {
@@ -211,7 +214,7 @@ export default class Algorithm {
         // equate p2 and p1, as if p1 and p2 were the bottom of the field
         if (p1Obj.gravityImmune) p2.row = p1.row;
 
-        if (p1Obj !== p2Obj) {
+        else if (p1Obj !== p2Obj) {
           // objects in p1 and p2 are different and need to exchange,
           result.push(new Diff({
             type: Diff.Type.EXCHANGE,

@@ -218,13 +218,11 @@
       async clear() {
         let tl_arr = [];
         // set connections
-        let connections = this.game.field.connections();
-        let flatten = arrs => arrs.reduce((acc, arr) => acc.concat(arr), []);
-        let flattenedConnections = flatten(flatten(Array.from(connections.values())));
-        if (flattenedConnections.length === 0) {
+        let connections = Field.Algorithm.flattenConnectionMap(this.game.field.connections());
+        if (connections.length === 0) {
           return false;
         }
-        this.game.field.clear().forEach(diff => {
+        this.game.field.clear(connections).forEach(diff => {
           // create timeline
           let tl = new TimelineMax({ paused: true });
           tl.to(
