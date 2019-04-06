@@ -1,0 +1,38 @@
+language: node_js
+node_js:
+    # latest stable version
+    - "node"
+
+env:
+    # directory of build artifacts
+    - OUTPUT_DIR=dist
+
+cache: npm
+branches:
+    only:
+        - master
+
+script:
+    - npm build
+
+# both of the following scripts are deployment scripts:
+# in case of pull request, upload build artifacts to preview site;
+# otherwise, upload to core site.
+
+before_script:
+    - |
+      if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+        git clone -b gh-pages --depth 1 "https://${GITHUB_TOKEN}@github.com/puyotw/simulator.git" $OUTPUT_DIR
+        rm -fr $OUTPUT_DIR
+      fi
+
+after_success:
+    - |
+      if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+        cd $OUTPUT_DIR
+        git config --global user.email "carbuncle-bot-puyotw[bot]@users.noreply.github.com"
+        git config --global user.name  "carbuncle-bot-puyotw[bot]"
+        git add . > /dev/null
+        git commit -m "Travis build $TRAVIS_BUILD_NUMBER against commit $TRAVIS_COMMIT. (#$TRAVIS_PULL_REQUEST)" > /dev/null
+        git push origin gh-pages
+      fi
