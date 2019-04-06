@@ -82,13 +82,11 @@
       }
     },
     created() {
-      if (this.base64 === 'Aw////v+BIA=') {
-        let params = (new URL(document.location)).search;
-        var searchParams = new URLSearchParams(params);
-        for (var key of searchParams.keys()) {
-          this.passBase64 = key;
-          break;
-        }
+      let params = (new URL(document.location)).search;
+      var searchParams = new URLSearchParams(params);
+      for (var key of searchParams.keys()) {
+        this.passBase64 = key;
+        break;
       }
     }
   };

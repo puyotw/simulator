@@ -13,7 +13,7 @@
     },
     data() {
       return {
-        base64: 'Aw////v+BIA=',
+        base64: 'AgJA',
       };
     }
   };
