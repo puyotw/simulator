@@ -40,6 +40,35 @@ for (let i = 0; i < puyoname.length; i++) {
     }
 }
 
+let others = ['nuisance', 'hard-nuisance', 'iron', 'blocks'];
+
+for (let i = 0; i < others.length; i++) {
+    data.frames[others[i]] = {
+        frame: {
+            x: i * puyowidth,
+            y: 5 * puyowidth,
+            w: puyowidth,
+            h: puyowidth,
+        },
+        rotated: false,
+        trimmed: false,
+        spriteSourceSize: {
+            x: 0,
+            y: 0,
+            w: puyowidth,
+            h: puyowidth,
+        },
+        sourceSize: {
+            w: puyowidth,
+            h: puyowidth,
+        },
+        pivot: {
+            x: 0.5,
+            y: 0.5,
+        }
+    };
+}
+
 fs.writeFile('skin.json', JSON.stringify(data, null, 2), (err) => {  
     // throws an error, you could also catch it here
     if (err) throw err;

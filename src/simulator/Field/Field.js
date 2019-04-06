@@ -164,7 +164,7 @@ export default class Field {
        * @return a connection bit field about this Positional.
        */
       get connections() {
-        if (this.object.hidden) return 0;
+        if (!this.object || this.hidden) return 0;
 
         return 0 | (!this.below.hidden && this.below.object == this.object ? ConnectionBitField.BELOW : 0)
                  | (!this.above.hidden && this.above.object == this.object ? ConnectionBitField.ABOVE : 0)

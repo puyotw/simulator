@@ -27,7 +27,7 @@ with margin time = undefined, nuisance multiplier after 500 sec:
 </template>
 
 <script>
-  import PuyoEditor from './PuyoSimulatorEditor.vue';
+  import PuyoEditor from './component/PuyoSimulatorEditor.vue';
   import Tsu from './simulator/Game/Tsu.js';
   import Game from './simulator/Game/Game.js';
   import Field from './simulator/Field/Field.js';

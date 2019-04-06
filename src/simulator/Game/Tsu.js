@@ -288,7 +288,7 @@ export default class Tsu extends Game {
         cloned.gravitate = this.gravitate;
         cloned.connections = this.connections;
         cloned.clear = this.clear;
-
+        cloned.clone = this.clone;
         return cloned;
       };
     }
