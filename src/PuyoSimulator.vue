@@ -11,7 +11,7 @@ base64 field:
 decoded field:
 {{ decoded }}
 
-decoded field margin time setting is no:
+decoded field margin time setting is null:
 {{ noMarginTime }}
 
 final field:
@@ -20,7 +20,7 @@ final field:
 points:
 {{ points }}
 
-with margin time = undefined, nuisance multiplier after 500 sec:
+with margin time = null, nuisance multiplier after 500 sec:
 {{ multiplier }}
     </pre>
   </div>

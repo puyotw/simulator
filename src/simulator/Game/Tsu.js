@@ -14,7 +14,7 @@ const RULE_KEYS = [
 
 const RULE_PARTITION_SIZES = [
   8, // classic max 255, modern max 990, partition max 255
-  9, // classic max 992, modern max 256, partition max 510; 511 means no margin time
+  9, // classic max 992, modern max 256, partition max 510
   3, // classic max 72,  modern max ???, partition max 7
   8, // classic max 255, modern max 0,   partition max 255
   5, // max unknown, partition max 31 

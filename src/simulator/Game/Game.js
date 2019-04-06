@@ -37,15 +37,20 @@ export default class Game {
      * The structure of the header will look like:
      *  {
      *    0, if actual == default, otherwise
-     *    1, then <varlen<partition size>>
+     *    1, then {
+     *      0, if actual === null,
+     *      1, then <varlen<partition size>>
+     *    }
      *  } * default.length
      *
-     *  For example, with actual = [1, 2, 3], default = [1, 1, 3], partSize = [4, 4, 4],
-     *  The binary of header will look like: 0b0001101000010, because:
-     *  0b 0         actual[0] == default[0]
-     *     1         actual[1] != default[1]
-     *       00001   varlen<partSize[1]>(actual[1])
-     *     0         actual[2] == default[2]
+     * For example, with actual = [1, 2, 3, null], default = [1, 1, 3, 2], partSize = [4, 4, 4, 4],
+     * The binary of header will look like: 0b0100001010, because:
+     * 0b 0         actual[0] == default[0]
+     *    1         actual[1] != default[1]
+     *      00001   varlen<partSize[1]>(actual[1])
+     *    0         actual[2] == default[2]
+     *    1         actual[3] != default[3]
+     *      0       actual[3] === null
      *  
      * @param {BitOutputStream} ostream - the bit stream to output the header to.
      * @param {[Number, ...]} actualParams - the array of actual parameter values
@@ -67,12 +72,16 @@ export default class Game {
           ostream.write({ value: 0, writeBitCount: 1 });
         } else {
           ostream.write({ value: 1, writeBitCount: 1 });
-          ostream.writeVariableLength({
-            value: actualParams[index] === null ? ~0 
-                                                : actualParams[index],
-            writeBitCount: MAX_BIT_COUNT,
-            partitionBitCount: partitionSizes[index]
-          });
+          if (actualParams[index] === null) {
+            ostream.write({ value: 0, writeBitCount: 1 });
+          } else {
+            ostream.write({ value: 1, writeBitCount: 1 });
+            ostream.writeVariableLength({
+              value: actualParams[index],
+              writeBitCount: MAX_BIT_COUNT,
+              partitionBitCount: partitionSizes[index]
+            });
+          }
         }
       }
     }
@@ -140,12 +149,8 @@ export default class Game {
     }) {
       for (let index = 0; index < defaultParams.length; ++index) {
         if (istream.read(1) === 0) continue;
-
-        defaultParams[index] = istream.readVariableLength(partitionSizes[index]);
-        if (defaultParams[index] === ~0) {
-          // treat ~0 as special value of null
-          defaultParams[index] = null;
-        }
+        defaultParams[index] = istream.read(1) === 0 ? null
+                                                     : istream.readVariableLength(partitionSizes[index]);
       } 
 
       return defaultParams;
