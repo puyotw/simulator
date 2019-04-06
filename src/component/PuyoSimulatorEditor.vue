@@ -1,6 +1,6 @@
 <template>
   <div class="editor">
-    <PuyoPlayer :base64.sync="passBase64" :genBase64="genBase64" :editMode="true" :color="color"/>
+    <PuyoPlayer :encoded.sync="passEncoded" :encode="encode" :editMode="true" :color="color"/>
     <div class="editor__control">
       <ul class="editor__color">
         <li v-for="i in colorList" :key="i" 
@@ -8,10 +8,10 @@
           :class="[{'editor__color--active': color === i},'editor__color--' + i]"></li>
       </ul>
       <div class="editor__color">
-        <input id="inputBase64" class="editor__base64" type="text" name="base64"
-         :value="passBase64"/>
-        <button class="editor__button" @click="genBase64+=1">Code</button>
-        <button class="editor__button" @click="copyBase64()">Copy</button>
+        <input id="inputEncoded" class="editor__encoded" type="text" name="encoded"
+         :value="passEncoded"/>
+        <button class="editor__button" @click="encode+=1">Code</button>
+        <button class="editor__button" @click="copyEncoded()">Copy</button>
       </div>
     </div>
   </div>
@@ -26,9 +26,9 @@
       PuyoPlayer,
     },
     props: {
-      base64:  {
+      encoded:  {
         type: String,
-        default: 'Aw////v+BIA='
+        default: ''
       },
     },
     data() {
@@ -37,16 +37,16 @@
         fieldWidth: 6,
         fieldHeight: 12,
         fieldHidden: 1,
-        passBase64: this.base64,
-        genBase64: 0,
+        passEncoded: this.encoded,
+        encode: 0,
         color: 'EMPTY'
       };
     },
     computed: {
     },
     methods: {
-      copyBase64() {
-        document.getElementById('inputBase64').select();
+      copyEncoded() {
+        document.getElementById('inputEncoded').select();
         document.execCommand('copy');
       }
     },
@@ -123,7 +123,7 @@ $editor-width: $skin-puyo-size * 6;
       @include set-skin(-1,-8);
     }
   }
-  &__base64 {
+  &__encoded {
     font-size: 20px;
   }
   &__button {

@@ -21,8 +21,8 @@
       };
     },
     props: {
-      base64: String,
-      genBase64: Number,
+      encoded: String,
+      encode: Number,
       state: String,
       editMode: Boolean,
       color: String,
@@ -110,8 +110,8 @@
             break;
         }
       },
-      genBase64() {
-        this.generateBase64();
+      encode() {
+        this.encodeGame();
       },
     },
     computed: {
@@ -120,9 +120,9 @@
       }
     },
     methods: {
-      generateBase64() {
-        let newBase64 = Game.Serializer.toBitStream(this.game).finalize();
-        this.$emit('update:base64', newBase64);
+      encodeGame() {
+        let encoded = Game.Serializer.encode(this.game);
+        this.$emit('update:encoded', encoded);
       },
       timelinePromise(timeline, diff, state) {
         return new Promise((resolve) => {
@@ -410,7 +410,7 @@
     created() {
       // tree shaking prevention
       const plugins = [ PixiPlugin, Tsu ]; // eslint-disable-line no-unused-vars
-      this.game = Game.Deserializer.fromBase64(this.base64);
+      this.game = this.encoded ? Game.Deserializer.fromEncoded(this.encoded) : new Tsu;
       this.savedField = null;
       this.pixifield = new Array(this.game.field.dimension.rows)
         .fill(null)

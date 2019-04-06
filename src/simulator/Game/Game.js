@@ -106,12 +106,12 @@ export default class Game {
     }
 
     /**
-     * Serialzies the given game to a base64 encoded string.
+     * Serialzies the given game to an encoded string.
      *
      * @param {Game} game - the game to serialize.
-     * @return {String} the base64 encoded string.
+     * @return {String} the encoded string.
      */
-    static toBase64(game) {
+    static encode(game) {
       return Game.Serializer.toBitStream(game).finalize();
     }
   }
@@ -167,13 +167,13 @@ export default class Game {
     }
 
     /**
-     * Deserializes a Game object from the given base64 encoded string.
+     * Deserializes a Game object from the given encoded string.
      *
-     * @param {String} base64 - the base64 encoded string.
+     * @param {String} encoded - the encoded string.
      * @return {Game} the deserialized Game object.
      */
-    static fromBase64(base64) {
-      return Game.Deserializer.fromBitStream(new BitStreamReader(base64));
+    static fromEncoded(encoded) {
+      return Game.Deserializer.fromBitStream(new BitStreamReader(encoded));
     }
   }
 

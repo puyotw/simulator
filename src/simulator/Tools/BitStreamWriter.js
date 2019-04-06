@@ -1,6 +1,10 @@
 const CHAR_BIT = 8;
 
-const Base64 = require('base64-js');
+const Buffer  = require('safe-buffer').Buffer;
+const Encoder = require('base-x')('0123456789' +
+                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
+                                  'abcdefghijklmnopqrstuvwxyz' +
+                                  '-._~');
 
 export default class BitStreamWriter {
   /** Stores an incomplete byte. */
@@ -92,13 +96,13 @@ export default class BitStreamWriter {
   }
 
   /**
-   * Converts written stream to Base64 encoding. Finalizes this BitStreamWriter.
-   * @return {String} Base64 encoded data written to this stream.
+   * Converts written stream to encoding. Finalizes this BitStreamWriter.
+   * @return {String} Encoded data written to this stream.
    */
   finalize() {
     this.#flush();
     Object.freeze(this);
-    return Base64.fromByteArray(this.#stream);
+    return Encoder.encode(Buffer.from(this.#stream));
   }
 }
 

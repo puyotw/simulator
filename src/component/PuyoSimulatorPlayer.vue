@@ -1,6 +1,6 @@
 <template>
   <div class="player">
-    <PuyoField :base64.sync="passBase64" :genBase64="genBase64" :state.sync="state" :editMode="editMode" :color="color"/>
+    <PuyoField :encoded.sync="passEncoded" :encode="encode" :state.sync="state" :editMode="editMode" :color="color"/>
     <ul class="player__control">
       <li v-if="!playing" v-on:click.stop="play">
         <i class="fas fa-play"></i>
@@ -31,11 +31,11 @@
       PuyoField,
     },
     props: {
-      base64:  {
+      encoded:  {
         type: String,
-        default: 'Aw////v+BIA='
+        default: ''
       },
-      genBase64: {
+      encode: {
         type: Number,
         default: 0
       },
@@ -50,13 +50,13 @@
     },
     data() {
       return {
-        passBase64: this.base64,
+        passEncoded: this.encoded,
         state: STATE_IDLE,
       };
     },
     watch: {
-      passBase64() {
-        this.$emit('update:base64', this.passBase64);
+      passEncoded() {
+        this.$emit('update:encoded', this.passEncoded);
       }
     },
     computed: {
@@ -78,14 +78,14 @@
         this.state = STATE_RESET;
       },
       openEditPage() {
-        window.open('./?' + encodeURIComponent(this.passBase64), '_blank');
+        window.open('./?' + encodeURIComponent(this.passEncoded), '_blank');
       }
     },
     created() {
       let params = (new URL(document.location)).search;
       var searchParams = new URLSearchParams(params);
       for (var key of searchParams.keys()) {
-        this.passBase64 = key;
+        this.passEncoded = key;
         break;
       }
     }

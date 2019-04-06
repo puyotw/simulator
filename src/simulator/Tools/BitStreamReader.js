@@ -1,6 +1,9 @@
 const CHAR_BIT = 8;
 
-const Base64 = require('base64-js');
+const Decoder = require('base-x')('0123456789' +
+                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
+                                  'abcdefghijklmnopqrstuvwxyz' +
+                                  '-._~');
 
 export default class BitStreamReader {
   #buffer = 0;
@@ -10,11 +13,11 @@ export default class BitStreamReader {
   /**
    * Constructs this BitStreamReader.
    *
-   * @param {String} base64 - the base64-encoded string that contains binary
-   *                          data for this stream to read.
+   * @param {String} encoded - the encoded string that contains binary data
+   *                           for this stream to read.
    */
-  constructor(base64) {
-    this.#stream = Array.from(Base64.toByteArray(base64));
+  constructor(encoded) {
+    this.#stream = Array.from(Decoder.decode(encoded));
   }
 
   /**

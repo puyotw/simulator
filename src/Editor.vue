@@ -1,6 +1,6 @@
 <template>
   <div id="simulator">
-    <PuyoEditor :base64="base64"/>
+    <PuyoEditor :encoded="encoded"/>
   </div>
 </template>
 
@@ -13,7 +13,7 @@
     },
     data() {
       return {
-        base64: 'AgJA',
+        encoded: '',
       };
     }
   };
