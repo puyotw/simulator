@@ -5,34 +5,40 @@
 <script>
   import * as PIXI from 'pixi.js';
   import { TimelineMax } from 'gsap/TweenMax';
-  import PixiPlugin from 'gsap/PixiPlugin'; // eslint-disable-line no-unused-vars
-  import Game from './simulator/Game/Game.js';
-  import Field from './simulator/Field/Field.js';
-  import { BLOCK_WIDTH, RECOVERY_FRAME, STATE_IDLE, STATE_PLAY, STATE_STEP, STATE_RESET, STATE_END } from './simulator/Constant';
+  import PixiPlugin from 'gsap/PixiPlugin';
+  import Tsu from '../simulator/Game/Tsu.js';
+  import Game from '../simulator/Game/Game.js';
+  import Field from '../simulator/Field/Field.js';
+  import { BLOCK_WIDTH, RECOVERY_FRAME, STATE_IDLE, STATE_PLAY, STATE_STEP, STATE_RESET, STATE_END } from '../simulator/Constant';
 
   export default {
     name: 'PuyoField',
     data() {
       return {
         app: null,
-        container: {
-          bg: null,
-          puyo: null,
-        },
         game: null,
-        pixifield: null,
-        playable: true,
+        chain: 0,
       };
     },
     props: {
       base64: String,
+      genBase64: Number,
       state: String,
+      editMode: Boolean,
+      color: String,
     },
     watch: {
       state(newState, oldState) {
         switch (newState) {
           case STATE_PLAY:
               if (oldState === STATE_IDLE) {
+                if (!this.savedField) {
+                  this.savedField = this.game.field.clone();
+                  if (this.editMode) {
+                    this.container.editor.interactive = false;
+                    this.container.editor.renderable = false;
+                  }
+                }
                 this.play();
               } else {
                 this.$emit('update:state', STATE_IDLE);
@@ -40,14 +46,22 @@
             break;
           case STATE_STEP:
               if (oldState === STATE_IDLE) {
+                if (!this.savedField) {
+                  this.savedField = this.game.field.clone();
+                  if (this.editMode) {
+                    this.container.editor.interactive = false;
+                    this.container.editor.renderable = false;
+                  }
+                }
                 this.step();
               } else {
                 this.$emit('update:state', STATE_IDLE);
               }
             break;
           case STATE_RESET:
-              if ((oldState === STATE_IDLE) ||
-                  (oldState === STATE_END)) {
+              if (((oldState === STATE_IDLE) ||
+                  (oldState === STATE_END)) &&
+                  (this.savedField)) {
                 this.reset();
               } else {
                 this.$emit('update:state', STATE_IDLE);
@@ -59,8 +73,57 @@
             break;
         }
       },
+      color(value) {
+        // change cursor sprite
+        let skintex = PIXI.loader.resources['pic/skin.json'].textures;
+        switch (value) {
+          case 'RED':
+            this.editor.color.texture = skintex['red0'];
+            break;
+          case 'GREEN':
+            this.editor.color.texture = skintex['green0'];
+            break;
+          case 'BLUE':
+            this.editor.color.texture = skintex['blue0'];
+            break;
+          case 'YELLOW':
+            this.editor.color.texture = skintex['yellow0'];
+            break;
+          case 'PURPLE':
+            this.editor.color.texture = skintex['purple0'];
+            break;
+          case 'BLOCK':
+            this.editor.color.texture = skintex['blocks'];
+            break;
+          case 'NUISANCE':
+            this.editor.color.texture = skintex['nuisance'];
+            break;
+          case 'HARD_NUISANCE':
+            this.editor.color.texture = skintex['hard-nuisance'];
+            break;
+          case 'IRON':
+            this.editor.color.texture = skintex['iron'];
+            break;
+          case 'EMPTY':
+          default:
+            this.editor.color.texture = null;
+            break;
+        }
+      },
+      genBase64() {
+        this.generateBase64();
+      },
+    },
+    computed: {
+      editorColor() {
+        return Field.Object[this.color];
+      }
     },
     methods: {
+      generateBase64() {
+        let newBase64 = Game.Serializer.toBitStream(this.game).finalize();
+        this.$emit('update:base64', newBase64);
+      },
       timelinePromise(timeline, diff, state) {
         return new Promise((resolve) => {
             timeline.play();
@@ -98,9 +161,15 @@
         for (var i = this.container.puyo.children.length - 1; i >= 0; i--) {
           this.container.puyo.removeChild(this.container.puyo.children[i]);
         }
-        this.game = Game.Deserializer.fromBase64(this.base64);
+        this.game.field = this.savedField;
+        this.savedField = null;
+        if (this.editMode) {
+          this.container.editor.interactive = true;
+          this.container.editor.renderable = true;
+        }
         this.loadpuyo();
         this.$emit('update:state', STATE_IDLE);
+        this.chain = 0;
       },
       async gravity() {
         let tl_arr = [];
@@ -162,9 +231,15 @@
             this.pixifield[diff.positional.row][diff.positional.column],
             0.1, 
             { pixi: { alpha: 0.5 }, repeat: 5, yoyo: true, onComplete: ()=>{
-              // remove sprite when clear animation complete
-              this.container.puyo.removeChild(this.pixifield[diff.positional.row][diff.positional.column]);
-              this.pixifield[diff.positional.row][diff.positional.column] = null;
+                // remove sprite when clear animation complete
+                let pos = new this.game.field.Positional({
+                  row: diff.positional.row,
+                  column: diff.positional.column,
+                });
+                pos.object = diff.newObject;
+                this.setpuyo(pos, pos.connections);
+                // chain+1 / +score
+                this.chain += 1;
               }
             },
           );
@@ -187,15 +262,15 @@
         );
         this.container.bg.addChild(bg);
         let bgleft = new PIXI.extras.TilingSprite(
-            bgtex['bgleft'],
-            48,
+            bgtex['bgdark'],
+            BLOCK_WIDTH * 1.5,
             this.app.screen.height
         );
         this.container.bg.addChild(bgleft);
         let bgtop = new PIXI.extras.TilingSprite(
-            bgtex['bgtop'],
+            bgtex['bgdark'],
             this.app.screen.width,
-            48
+            BLOCK_WIDTH * 1.5
         );
         this.container.bg.addChild(bgtop);
         let pole1_left = new PIXI.extras.TilingSprite(
@@ -239,8 +314,52 @@
           this.setpuyo(pos, pos.connections);
         }
       },
+      loadEditor() {
+        let bgtex = PIXI.loader.resources['pic/bg.json'].textures;
+        this.editor.cursor = new PIXI.Sprite(bgtex['select']);
+        this.editor.color = new PIXI.Sprite();
+        this.container.editor.addChild(this.editor.cursor);
+        this.container.editor.addChild(this.editor.color);
+        this.container.editor.interactive = true;
+        this.container.editor.renderable = false;
+        this.container.editor.hitArea = new PIXI.Rectangle(BLOCK_WIDTH, 0, 
+          this.game.field.dimension.columns * BLOCK_WIDTH, 
+          this.game.field.dimension.rows * BLOCK_WIDTH);
+        this.container.editor.on('mousemove', (event) => {
+          const x = event.data.global.x;
+          const y = event.data.global.y;
+          this.editor.cursor.x = Math.floor(x / BLOCK_WIDTH) * BLOCK_WIDTH;
+          this.editor.cursor.y = Math.floor(y / BLOCK_WIDTH) * BLOCK_WIDTH;
+          this.editor.color.x = Math.floor(x / BLOCK_WIDTH) * BLOCK_WIDTH;
+          this.editor.color.y = Math.floor(y / BLOCK_WIDTH) * BLOCK_WIDTH;
+          this.container.editor.renderable = true;
+        });
+        this.container.editor.on('mouseout', (event) => {
+          this.container.editor.renderable = false;
+        });        
+        this.container.editor.on('click', (event) => {
+            this.savedField = null;
+            let pos = new this.game.field.Positional({
+              row: this.game.field.dimension.rows - (Math.floor(event.data.global.y / BLOCK_WIDTH) + 1),
+              column: Math.floor(event.data.global.x / BLOCK_WIDTH) - 1,
+            });
+            pos.object = this.editorColor;
+            // set color
+            if (!this.pixifield[pos.row][pos.column]) {
+              this.pixifield[pos.row][pos.column] = new PIXI.Sprite();
+            }
+            this.setpuyo(pos, pos.connections);
+            this.setpuyo(pos.left, pos.left.connections);
+            this.setpuyo(pos.right, pos.right.connections);
+            this.setpuyo(pos.above, pos.above.connections);
+            this.setpuyo(pos.below, pos.below.connections);
+        });
+      },
       setpuyo(pos, connections = 0) {
         let skintex = PIXI.loader.resources['pic/skin.json'].textures;
+        if (!pos.valid) {
+          return;
+        }
         let thisPuyo = this.pixifield[pos.row][pos.column];
         if (!thisPuyo) {
           return;
@@ -261,17 +380,45 @@
           case Field.Object.PURPLE:
             thisPuyo.texture = skintex[`purple${connections}`];
             break;
+          case Field.Object.BLOCK:
+            thisPuyo.texture = skintex['blocks'];
+            break;
+          case Field.Object.NUISANCE:
+            thisPuyo.texture = skintex['nuisance'];
+            break;
+          case Field.Object.HARD_NUISANCE:
+            thisPuyo.texture = skintex['hard-nuisance'];
+            break;
+          case Field.Object.IRON:
+            thisPuyo.texture = skintex['iron'];
+            break;
+          case Field.Object.EMPTY:
           default:
+            thisPuyo.texture = null;
             break;
         }
-        thisPuyo.x = (pos.column + 1) * BLOCK_WIDTH;
-        thisPuyo.y = (this.game.field.dimension.rows - pos.row - 1) * BLOCK_WIDTH;
-        this.container.puyo.addChild(thisPuyo);
+        if (pos.object === Field.Object.EMPTY) {
+          this.container.puyo.removeChild(thisPuyo);
+          this.pixifield[pos.row][pos.column] = null;
+        } else {
+          thisPuyo.x = (pos.column + 1) * BLOCK_WIDTH;
+          thisPuyo.y = (this.game.field.dimension.rows - pos.row - 1) * BLOCK_WIDTH;
+          this.container.puyo.addChild(thisPuyo);
+        }
       }
     },
     created() {
+      // tree shaking prevention
+      const plugins = [ PixiPlugin, Tsu ]; // eslint-disable-line no-unused-vars
       this.game = Game.Deserializer.fromBase64(this.base64);
-      this.pixifield = new Array(this.game.field.dimension.rows).fill(null).map(() => new Array(this.game.field.dimension.columns).fill(null));
+      this.savedField = null;
+      this.pixifield = new Array(this.game.field.dimension.rows)
+        .fill(null)
+        .map(() =>
+          new Array(this.game.field.dimension.columns)
+            .fill(null)
+        );
+      Object.defineProperty(this.pixifield, '_isVue', { value: true, enumerable: false });
       this.app = new PIXI.Application({
         width: (this.game.field.dimension.columns + 2) * BLOCK_WIDTH, // left & right pole (+2)
         height: (this.game.field.dimension.rows + 1) * BLOCK_WIDTH,   // floor (+1)
@@ -279,16 +426,32 @@
         transparent: false,
         resolution: 1
       });
+      this.container = {};
+      Object.defineProperty(this.container, '_isVue', { value: true, enumerable: false });
       this.container.bg = new PIXI.Container();
+      Object.defineProperty(this.container.bg, '_isVue', { value: true, enumerable: false });
       this.container.puyo = new PIXI.Container();
+      Object.defineProperty(this.container.puyo, '_isVue', { value: true, enumerable: false });
+      
       // make 2 groups for background and puyo
       this.app.stage.addChild(this.container.bg);
       this.app.stage.addChild(this.container.puyo);
+
       PIXI.loader
       .add('pic/bg.json')
       .add('pic/skin.json')
       .load(this.loadbg)
       .load(this.loadpuyo);
+
+      if (this.editMode) {
+        this.container.editor = new PIXI.Container();
+        Object.defineProperty(this.container.editor, '_isVue', { value: true, enumerable: false });
+        this.app.stage.addChild(this.container.editor);
+        this.app.renderer.plugins.interaction.moveWhenInside = true;
+        this.editor = {};
+        Object.defineProperty(this.editor, '_isVue', { value: true, enumerable: false });
+        PIXI.loader.load(this.loadEditor);
+      }
     },
     mounted() {
       document.getElementById('puyostage').appendChild(this.app.view);
