@@ -218,9 +218,20 @@ export default class Field {
         yield pos;
   }
 
+  /**
+   * Creates a clone of the field at its current state. Furthur modification to the cloned field
+   * does not affect the current field, and vice versa.
+   */
   clone() {
     let cloned = new this.constructor(this.dimension);
     cloned.#data = this.#data.map(column => column !== undefined ? column.slice() : undefined);
     return cloned;
+  }
+
+  /**
+   * Erases every object from the current field.
+   */
+  erase() {
+    this.#data = [];
   }
 }
