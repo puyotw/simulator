@@ -22,6 +22,7 @@
 <style>
 html, body {
   margin: 0;
+  overflow: hidden;
 }
 ul {
   list-style: none;

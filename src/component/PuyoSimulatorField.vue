@@ -22,7 +22,6 @@
     },
     props: {
       encoded: String,
-      encode: Number,
       state: String,
       editMode: Boolean,
       color: String,
@@ -129,7 +128,7 @@
             timeline.play();
             timeline.eventCallback('onComplete', () => {
               if (state === 'gravity') {
-                this.setpuyo(diff.otherPositional, diff.otherPositional.connections);
+                this.setPuyo(diff.otherPositional, diff.otherPositional.connections);
               }
               resolve();
             });
@@ -157,17 +156,20 @@
         }
         this.$emit('update:state', STATE_END);
       },
-      reset() {
+      clearAll() {
         for (var i = this.container.puyo.children.length - 1; i >= 0; i--) {
           this.container.puyo.removeChild(this.container.puyo.children[i]);
         }
+      },
+      reset() {
+        this.clearAll();
         this.game.field = this.savedField;
         this.savedField = null;
         if (this.editMode) {
           this.container.editor.interactive = true;
           this.container.editor.renderable = true;
         }
-        this.loadpuyo();
+        this.loadPuyo();
         this.$emit('update:state', STATE_IDLE);
         this.chain = 0;
       },
@@ -181,7 +183,7 @@
         for (let diff of gravitationalDiff) {
           // create drop animation timeline
           let tl = new TimelineMax({ paused: true });
-          this.setpuyo(diff.positional);
+          this.setPuyo(diff.positional);
           tl.to(
             this.pixifield[diff.positional.row][diff.positional.column],
             RECOVERY_FRAME[diff.positional.row - diff.otherPositional.row] / 60,
@@ -211,7 +213,7 @@
         // wait all timelines completed
         await Promise.all(drop_animation).then(() => {
           // check puyo connections
-          this.loadpuyo(false);
+          this.loadPuyo(false);
         });
         return true;
       },
@@ -235,7 +237,7 @@
                   column: diff.positional.column,
                 });
                 pos.object = diff.newObject;
-                this.setpuyo(pos, pos.connections);
+                this.setPuyo(pos, pos.connections);
                 // chain+1 / +score
                 this.chain += 1;
               }
@@ -250,7 +252,7 @@
         await Promise.all(clear_animation);
         return true;
       },
-      loadbg() {
+      loadBg() {
         let bgtex = PIXI.loader.resources['pic/bg.json'].textures;
         // set background
         let bg = new PIXI.extras.TilingSprite(
@@ -302,22 +304,22 @@
         block.y = this.app.screen.height - BLOCK_WIDTH;
         this.container.bg.addChild(block);
       },
-      loadpuyo(init = true) {
+      loadPuyo(init = true) {
         // set puyo
         for (let pos of this.game.field) {
           if (init && pos.object !== Field.Object.EMPTY) {
             // new Sprite object
             this.pixifield[pos.row][pos.column] = new PIXI.Sprite();
           }
-          this.setpuyo(pos, pos.connections);
+          this.setPuyo(pos, pos.connections);
         }
       },
       loadEditor() {
         let bgtex = PIXI.loader.resources['pic/bg.json'].textures;
         this.editor.cursor = new PIXI.Sprite(bgtex['select']);
         this.editor.color = new PIXI.Sprite();
-        this.container.editor.addChild(this.editor.cursor);
         this.container.editor.addChild(this.editor.color);
+        this.container.editor.addChild(this.editor.cursor);
         this.container.editor.interactive = true;
         this.container.editor.renderable = false;
         this.container.editor.hitArea = new PIXI.Rectangle(BLOCK_WIDTH, 0, 
@@ -346,14 +348,14 @@
             if (!this.pixifield[pos.row][pos.column]) {
               this.pixifield[pos.row][pos.column] = new PIXI.Sprite();
             }
-            this.setpuyo(pos, pos.connections);
-            this.setpuyo(pos.left, pos.left.connections);
-            this.setpuyo(pos.right, pos.right.connections);
-            this.setpuyo(pos.above, pos.above.connections);
-            this.setpuyo(pos.below, pos.below.connections);
+            this.setPuyo(pos, pos.connections);
+            this.setPuyo(pos.left, pos.left.connections);
+            this.setPuyo(pos.right, pos.right.connections);
+            this.setPuyo(pos.above, pos.above.connections);
+            this.setPuyo(pos.below, pos.below.connections);
         });
       },
-      setpuyo(pos, connections = 0) {
+      setPuyo(pos, connections = 0) {
         let skintex = PIXI.loader.resources['pic/skin.json'].textures;
         if (!pos.valid) {
           return;
@@ -438,8 +440,8 @@
       PIXI.loader
       .add('pic/bg.json')
       .add('pic/skin.json')
-      .load(this.loadbg)
-      .load(this.loadpuyo);
+      .load(this.loadBg)
+      .load(this.loadPuyo);
 
       if (this.editMode) {
         this.container.editor = new PIXI.Container();
@@ -460,5 +462,12 @@
   };
 </script>
 
-<style>
+<style lang="scss">
+
+#puyostage {
+  canvas{
+    vertical-align: top;
+  }
+}
+
 </style>

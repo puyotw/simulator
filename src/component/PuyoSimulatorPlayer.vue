@@ -1,6 +1,6 @@
 <template>
   <div class="player">
-    <PuyoField :encoded.sync="passEncoded" :encode="encode" :state.sync="state" :editMode="editMode" :color="color"/>
+    <PuyoField :encoded.sync="passEncoded" :state.sync="state" :editMode="editMode" :color="color"/>
     <ul class="player__control">
       <li v-if="!playing" v-on:click.stop="play">
         <i class="fas fa-play"></i>
@@ -34,10 +34,6 @@
       encoded:  {
         type: String,
         default: ''
-      },
-      encode: {
-        type: Number,
-        default: 0
       },
       editMode: {
         type: Boolean,
@@ -99,7 +95,7 @@
   &__control {
     display: flex;
     justify-content: center;
-    padding: 2px 0;
+    padding: 3px 0;
     li {
       width: 25%;
       background-color: #151515;

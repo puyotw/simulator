@@ -1,17 +1,23 @@
 <template>
   <div class="editor">
-    <PuyoPlayer :encoded.sync="passEncoded" :encode="encode" :editMode="true" :color="color"/>
+    <PuyoPlayer :encoded.sync="passEncoded" :editMode="true" :color="color"/>
     <div class="editor__control">
       <ul class="editor__color">
         <li v-for="i in colorList" :key="i" 
           @click="color = i"
           :class="[{'editor__color--active': color === i},'editor__color--' + i]"></li>
+        <li class="editor__color--CLEARALL" @click="clearAll">
+        </li>
       </ul>
-      <div class="editor__color">
+      <div class="editor__code">
         <input id="inputEncoded" class="editor__encoded" type="text" name="encoded"
          :value="passEncoded"/>
-        <button class="editor__button" @click="encode+=1">Code</button>
-        <button class="editor__button" @click="copyEncoded()">Copy</button>
+        <button class="editor__button" @click="genCode">
+          <i class="fas fa-code"></i>
+        </button>
+        <button class="editor__button" @click="copyEncoded">
+          <i class="fas fa-copy"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -38,13 +44,18 @@
         fieldHeight: 12,
         fieldHidden: 1,
         passEncoded: this.encoded,
-        encode: 0,
         color: 'EMPTY'
       };
     },
     computed: {
     },
     methods: {
+      clearAll() {
+        this.$children[0].$children[0].clearAll();
+      },
+      genCode() {
+        this.$children[0].$children[0].encodeGame();
+      },
       copyEncoded() {
         document.getElementById('inputEncoded').select();
         document.execCommand('copy');
@@ -69,14 +80,19 @@ $editor-width: $skin-puyo-size * 6;
 
 .editor {
   display: flex;
+  justify-content: space-around;
   background-color: #24292E;
   max-width: 650px;
   padding: 1rem;
+  &__code {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 1rem;
+  }
   &__color {
     display: flex;
     flex-wrap: wrap;
     max-width: $editor-width;
-    justify-content: space-around;
     li {
       width: $skin-puyo-size;
       padding-bottom: $skin-puyo-size;
@@ -122,6 +138,9 @@ $editor-width: $skin-puyo-size * 6;
     &--EMPTY {
       @include set-skin(-1,-8);
     }
+    &--CLEARALL {
+      @include set-skin(-2,-8);
+    }
   }
   &__encoded {
     font-size: 20px;
@@ -130,6 +149,7 @@ $editor-width: $skin-puyo-size * 6;
     background-color: #151515;
     color: #ddd;
     padding: 2px;
+    min-width: 3rem;
     border-radius: 2px;
     border: #ddd solid 1px;
     font-size: 20px;
