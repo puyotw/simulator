@@ -22,7 +22,7 @@ before_script:
     - |
       if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
         git clone --branch=gh-pages --single-branch --depth 1 "https://$GITHUB_TOKEN@github.com/puyotw/simulator.git" "$OUTPUT_DIR"
-        rm -fr "$OUTPUT_DIR/*"
+        rm -fr "$OUTPUT_DIR"/*
       fi
 
 after_success:
