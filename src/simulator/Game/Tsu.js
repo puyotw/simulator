@@ -45,6 +45,55 @@ const DIMENSION_PARTITION_SIZES = [
   2, // partition max 3
 ];
 
+/**
+ * Decorates the given game's field with convenience functions specific to the game.
+ */
+function decorateField(game) {
+  /**
+   * Pass through to Field.Algorithm.gravitationalDiff.
+   */
+  game.field.gravitate = function() {
+    return Field.Algorithm.gravitationalDiff(this);
+  };
+
+  /**
+   * Pass through to Field.Algorithm.findConnections, with targets and min
+   * connection specified.
+   */
+  game.field.connections = function() {
+    return Field.Algorithm.findConnections(this, {
+      targetObjects: ['RED', 'BLUE', 'GREEN', 'YELLOW', 'PURPLE'].map(key => Field.Object[key]),
+      minConnection: game.rule.minClearConnection
+    });
+  };
+
+  /**
+   * Pass through to Field.Algorithm.clearingDiff.
+   *
+   * @param {decltype(Field.Algorithm.flattenConnectionMap(this.field.connections()))} 
+   *        flattenedConnections = Field.Algorithm.flattenConnectionMap(this.field.connections())
+   *        The flattened connection map storing Positionals to clear. May be specified
+   *        if the flattened connection map was previously calculated.
+   */
+  game.field.clear = function(flattenedConnections = Field.Algorithm.flattenConnectionMap(this.connections())) {
+    return Field.Algorithm.clearingDiff(flattenedConnections);
+  };
+
+  {
+    let clone = game.field.clone;
+    // decorate the default clone function, to add the above conveniences
+    // functions to the cloned field as well.
+    game.field.clone = function() {
+      let cloned = clone.apply(this);
+      cloned.gravitate = this.gravitate;
+      cloned.connections = this.connections;
+      cloned.clear = this.clear;
+      cloned.clone = this.clone;
+      return cloned;
+    };
+  }
+}
+
 export default class Tsu extends Game {
   static GAME_ID = 0;
 
@@ -98,6 +147,16 @@ export default class Tsu extends Game {
 
       return game;
     }
+
+    /**
+     * Deserializes a Tsu game object given the field art and rule parameters.
+     */
+    static fromAsciiArt({ art, parameters }) {
+      let game = new Tsu({ rule: Object.assign({}, DEFAULT_RULE, parameters) });
+      game.field = Field.Deserializer.fromAsciiArt(art);
+      decorateField(game);
+      return game;
+    }
   }
 
   static Rule = class extends Rule {
@@ -111,9 +170,13 @@ export default class Tsu extends Game {
      *                                  to transform points.
      */
     constructor(rule = DEFAULT_RULE) {
-      super(rule);
-      this.nuisanceTransformPoint = rule.nuisanceTransformPoint;
-      this.level = rule.level;
+      super({
+        initialNuisanceRate: +rule.initialNuisanceRate,
+        marginTime: isNaN(rule.marginTime = parseInt(rule.marginTime)) ? null : rule.marginTime,
+        minClearConnection: +rule.minClearConnection
+      });
+      this.nuisanceTransformPoint = +rule.nuisanceTransformPoint;
+      this.level = +rule.level;
     }
 
     /**
@@ -215,10 +278,10 @@ export default class Tsu extends Game {
      *
      * @param {Number} chain - 
      *                 the chain count of this clearance. Adds chain bonus.
-     * @param {Number} connectionMap - 
+     * @param {Map}    connectionMap - 
      *                 the connections of this clearance. Adds color bonus and
      *                 group bonus.
-     * @param {Number} transformDiffs - 
+     * @param {[Diff]} transformDiffs - 
      *                 all transformations triggered by this clearance. Adds
      *                 colored object transform points and nuisance points.
      * @return {[Number, Number]}
@@ -245,54 +308,7 @@ export default class Tsu extends Game {
   constructor({ rule, dimension = DEFAULT_DIMENSION } = {}) {
     super({ rule: new Tsu.Rule(rule), dimension: dimension });
 
-    let self = this;
-
-    // the following functions extends this.field to have convenience functions
-    // specific to this game.
-
-    /**
-     * Pass through to Field.Algorithm.gravitationalDiff.
-     */
-    this.field.gravitate = function() {
-      return Field.Algorithm.gravitationalDiff(this);
-    };
-
-    /**
-     * Pass through to Field.Algorithm.findConnections, with targets and min
-     * connection specified.
-     */
-    this.field.connections = function() {
-      return Field.Algorithm.findConnections(this, {
-        targetObjects: ['RED', 'BLUE', 'GREEN', 'YELLOW', 'PURPLE'].map(key => Field.Object[key]),
-        minConnection: self.rule.minClearConnection
-      });
-    };
-
-    /**
-     * Pass through to Field.Algorithm.clearingDiff.
-     *
-     * @param {decltype(Field.Algorithm.flattenConnectionMap(this.field.connections()))} 
-     *        flattenedConnections = Field.Algorithm.flattenConnectionMap(this.field.connections())
-     *        The flattened connection map storing Positionals to clear. May be specified
-     *        if the flattened connection map was previously calculated.
-     */
-    this.field.clear = function(flattenedConnections = Field.Algorithm.flattenConnectionMap(this.connections())) {
-      return Field.Algorithm.clearingDiff(flattenedConnections);
-    };
-
-    {
-      let clone = this.field.clone;
-      // decorate the default clone function, to add the above conveniences
-      // functions to the cloned field as well.
-      this.field.clone = function() {
-        let cloned = clone.apply(this);
-        cloned.gravitate = this.gravitate;
-        cloned.connections = this.connections;
-        cloned.clear = this.clear;
-        cloned.clone = this.clone;
-        return cloned;
-      };
-    }
+    decorateField(this);
   } 
 }
 

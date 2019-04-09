@@ -175,6 +175,10 @@ export default class Game {
     static fromEncoded(encoded) {
       return Game.Deserializer.fromBitStream(new BitStreamReader(encoded));
     }
+
+    static fromAsciiArt({ art, parameters }) {
+      return Game.Modes[parameters.mode || 0].Deserializer.fromAsciiArt({ art: art, parameters: parameters });
+    }
   }
 
   constructor({ rule, dimension }) {

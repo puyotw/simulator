@@ -1,7 +1,6 @@
 module.exports = {
   publicPath: '/',
   productionSourceMap: false,
-  filenameHashing: true,
   pages: {
     main: {
       entry: 'src/main.js',

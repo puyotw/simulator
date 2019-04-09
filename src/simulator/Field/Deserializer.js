@@ -26,8 +26,8 @@ export default function(Field) {
     let pos = new field.Positional().top;
   
     for (let row of rows) {
-      // remove 3 character wall on both sides
-      let rowNoWalls = row.slice(3, -3);
+      // remove wall on both sides
+      let rowNoWalls = row.slice(3, -1);
       // extract symbol char from row string
       for (let [symbol, _, ...rest] = rowNoWalls;
            rest.length > 0;

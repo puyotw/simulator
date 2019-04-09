@@ -5,6 +5,12 @@
 original field:
 {{ field }}
 
+decoded field from Ascii:
+{{ asciiField }}
+
+Ascii base64 field:
+{{ asciiBase64 }}
+
 base64 field:
 {{ base64 }}
 
@@ -31,7 +37,6 @@ with margin time = null, nuisance multiplier after 500 sec:
   import Tsu from './simulator/Game/Tsu.js';
   import Game from './simulator/Game/Game.js';
   import Field from './simulator/Field/Field.js';
-  import BitStreamReader from './simulator/Tools/BitStreamReader.js';
 
   export default {
     components: {
@@ -57,9 +62,14 @@ with margin time = null, nuisance multiplier after 500 sec:
         iter++;
       }
 
-      let base64 = Game.Serializer.toBitStream(game).finalize();
-      let decoded = Game.Deserializer.fromBitStream(new BitStreamReader(base64));
       let initial = field.clone();
+      let asciiDecoded = Game.Deserializer.fromAsciiArt({
+        art: Field.Serializer.toAsciiArt(initial),
+        parameters: { mode: 0, marginTime: null }
+      });
+      let asciiBase64 = Game.Serializer.encode(asciiDecoded);
+      let base64 = Game.Serializer.encode(game);
+      let decoded = Game.Deserializer.fromEncoded(base64);
 
       let points = 0;
 
@@ -68,7 +78,7 @@ with margin time = null, nuisance multiplier after 500 sec:
         field.gravitate().apply();
 
         let connections = field.connections();
-        var diff = field.clear(connections);
+        var diff = field.clear(Field.Algorithm.flattenConnectionMap(connections));
 
         let [base, bonus] = game.rule.points({
             chain: chain,
@@ -83,6 +93,8 @@ with margin time = null, nuisance multiplier after 500 sec:
 
       return {
         field: Field.Serializer.toAsciiArt(initial),
+        asciiField: Field.Serializer.toAsciiArt(asciiDecoded.field),
+        asciiBase64: asciiBase64,
         base64: base64,
         decoded: Field.Serializer.toAsciiArt(decoded.field),
         final: Field.Serializer.toAsciiArt(field),
