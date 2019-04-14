@@ -7,8 +7,9 @@ import Game from './simulator/Game/Game.js';
  * specifications(e.g. data-marginTime="128"), with data-mode being the game
  * mode ID as registered by the modes themselves to the Game.Mode array.
  */
-(function(simulatorElms) {
-  simulatorElms.forEach($elm => {
+
+export function asciiToElement(simulatorElms) {
+  Array.from(simulatorElms).forEach($elm => {
     const code = Game.Serializer.encode(Game.Deserializer.fromAsciiArt($elm.innerHTML, $elm.dataset));
 
     let $iframe = document.createElement('iframe');
@@ -19,4 +20,6 @@ import Game from './simulator/Game/Game.js';
 
     $elm.parentNode.replaceChild($iframe, $elm);
   });
-})(document.getElementsByClassName('puyo-simulator'));
+}
+
+asciiToElement(document.getElementsByClassName('puyo-simulator'));
