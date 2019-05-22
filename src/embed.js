@@ -1,5 +1,6 @@
 import Game from './simulator/Game/Game.js';
 import Tsu from './simulator/Game/Tsu.js';
+import { BLOCK_WIDTH, TOOLBAR_HEIGHT } from './simulator/Constant.js'
 
 /**
  * Converts every element with class name 'puyo-simulator' to an iframe that
@@ -11,16 +12,17 @@ import Tsu from './simulator/Game/Tsu.js';
 
 export function asciiToElement(simulatorElms) {
   Array.from(simulatorElms).forEach($elm => {
-    const code = Game.Serializer.encode(Game.Deserializer.fromAsciiArt({
+    const game = Game.Deserializer.fromAsciiArt({
       art: $elm.innerHTML,
       parameters: Object.entries($elm.dataset)
-                        .reduce((params, [k, v]) => (params[k] = JSON.parse(v), params), {})
-    }));
-
+        .reduce((params, [k, v]) => (params[k] = JSON.parse(v), params), {})
+    });
+    const code = Game.Serializer.encode(game);
     let $iframe = document.createElement('iframe');
-    // TODO: calculate the dimensions somehow
-    $iframe.width = 500;
-    $iframe.height = 500;
+
+    $iframe.width = (game.field.dimension.columns + 2) * BLOCK_WIDTH;
+    $iframe.height = (game.field.dimension.rows + 1) * BLOCK_WIDTH + TOOLBAR_HEIGHT;
+    $iframe.style.border = 'none';
     $iframe.src = 'https://simulator.puyo.tw/player.html?' + code;
 
     $elm.parentNode.replaceChild($iframe, $elm);

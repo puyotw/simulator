@@ -160,13 +160,9 @@
         for (let i = this.container.puyo.children.length - 1; i >= 0; i--) {
           this.container.puyo.removeChild(this.container.puyo.children[i]);
         }
-        this.game.field.erase();
-        this.loadPuyo();
       },
       reset() {
-        for (let i = this.container.puyo.children.length - 1; i >= 0; i--) {
-          this.container.puyo.removeChild(this.container.puyo.children[i]);
-        }
+        this.clearAll();
         this.game.field = this.savedField;
         this.savedField = null;
         if (this.editMode) {

@@ -1,7 +1,7 @@
 <template>
   <div class="player">
     <PuyoField :encoded.sync="passEncoded" :state.sync="state" :editMode="editMode" :color="color"/>
-    <ul class="player__control">
+    <ul class="player__control" :style="playerHeight">
       <li v-if="!playing" v-on:click.stop="play">
         <i class="fas fa-play"></i>
       </li>
@@ -24,8 +24,7 @@
 
 <script>
   import PuyoField from './PuyoSimulatorField.vue';
-  import { STATE_IDLE, STATE_PLAY, STATE_STEP, STATE_RESET } from '../simulator/Constant';
-
+  import { STATE_IDLE, STATE_PLAY, STATE_STEP, STATE_RESET, PLAYERBAR_HEIGHT } from '../simulator/Constant';
   export default {
     components: {
       PuyoField,
@@ -58,6 +57,9 @@
     computed: {
       playing() {
         return this.state === STATE_PLAY;
+      },
+      playerHeight() {
+        return { height: `${PLAYERBAR_HEIGHT}px` };
       }
     },
     methods: {
@@ -91,7 +93,6 @@
 <style lang="scss" scoped>
 .player {
   background-color: #24292E;
-  max-width: 256px;
   &__control {
     display: flex;
     justify-content: center;
@@ -101,6 +102,7 @@
       background-color: #151515;
       color: #ddd;
       padding: 3px 0px;
+      box-sizing: border-box;
       border-radius: 2px;
       border: #ddd solid 1px;
       text-align: center;

@@ -80,10 +80,11 @@ $editor-width: $skin-puyo-size * 6;
 
 .editor {
   display: flex;
-  justify-content: space-around;
   background-color: #24292E;
-  max-width: 650px;
   padding: 1rem;
+  &__control{
+    margin-left: 1rem;
+  }
   &__code {
     display: flex;
     justify-content: space-around;
