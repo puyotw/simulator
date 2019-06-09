@@ -5,7 +5,7 @@ module.exports = {
     output: {
         filename: 'embed.js',
         path: path.resolve(__dirname, 'dist/js'),
-        library: 'puyoSimulatorElements',
+        library: 'PuyoSimulatorEmbed',
     },
     module: {
         rules: [
