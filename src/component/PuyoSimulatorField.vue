@@ -123,6 +123,9 @@
         let encoded = Game.Serializer.encode(this.game);
         this.$emit('update:encoded', encoded);
       },
+      genliquid() {
+        return Field.Serializer.toAsciiArt(this.game.field);
+      },
       timelinePromise(timeline, diff, state) {
         return new Promise((resolve) => {
             timeline.play();

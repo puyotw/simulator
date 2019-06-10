@@ -1,6 +1,6 @@
 <template>
   <div class="player">
-    <PuyoField :encoded.sync="passEncoded" :state.sync="state" :editMode="editMode" :color="color"/>
+    <PuyoField ref="puyoField" :encoded.sync="passEncoded" :state.sync="state" :editMode="editMode" :color="color"/>
     <ul class="player__control" :style="playerHeight">
       <li v-if="!playing" v-on:click.stop="play">
         <i class="fas fa-play"></i>

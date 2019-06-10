@@ -1,6 +1,6 @@
 <template>
   <div class="editor">
-    <PuyoPlayer :encoded.sync="passEncoded" :editMode="true" :color="color"/>
+    <PuyoPlayer ref="puyoPlayer" :encoded.sync="passEncoded" :editMode="true" :color="color"/>
     <div class="editor__control">
       <ul class="editor__color">
         <li v-for="i in colorList" :key="i" 
@@ -12,12 +12,16 @@
       <div class="editor__code">
         <input id="inputEncoded" class="editor__encoded" type="text" name="encoded"
          :value="passEncoded"/>
-        <button class="editor__button" @click="genCode">
+        <textarea id="liquidMarkdown" class="editor__liquid"></textarea>
+        <button class="editor__button" title="Generate Code" @click="genCode">
           <i class="fas fa-code"></i>
         </button>
-        <button class="editor__button" @click="copyEncoded">
+        <button class="editor__button" title="Copy Code" @click="copyEncoded">
           <i class="fas fa-copy"></i>
         </button>
+        <button class="editor__button" title="Generate Liquid" @click="copyLiquid">
+          <i class="fab fa-markdown"></i>
+        </button>        
       </div>
     </div>
   </div>
@@ -51,13 +55,19 @@
     },
     methods: {
       clearAll() {
-        this.$children[0].$children[0].clearAll();
+        this.$refs.puyoPlayer.$refs.puyoField.clearAll();
       },
       genCode() {
-        this.$children[0].$children[0].encodeGame();
+        this.$refs.puyoPlayer.$refs.puyoField.encodeGame();
       },
       copyEncoded() {
         document.getElementById('inputEncoded').select();
+        document.execCommand('copy');
+      },
+      copyLiquid() {
+        document.getElementById('liquidMarkdown').value = 
+        `{% puyosim mode:0 %}\n${this.$refs.puyoPlayer.$refs.puyoField.genliquid()}\n{% endpuyosim %}\n`;
+        document.getElementById('liquidMarkdown').select();
         document.execCommand('copy');
       }
     },
@@ -145,6 +155,10 @@ $editor-width: $skin-puyo-size * 6;
   }
   &__encoded {
     font-size: 20px;
+  }
+  &__liquid {
+    width: 1px;
+    opacity: 0;
   }
   &__button {
     background-color: #151515;
