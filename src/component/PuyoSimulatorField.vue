@@ -431,7 +431,8 @@
         height: (this.game.field.dimension.rows + 1) * BLOCK_WIDTH,   // floor (+1)
         antialias: true,
         transparent: false,
-        resolution: 1
+        resolution: 1,
+        forceCanvas: true,
       });
       this.container = {};
       Object.defineProperty(this.container, '_isVue', { value: true, enumerable: false });
